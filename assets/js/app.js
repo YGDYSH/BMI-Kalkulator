@@ -279,6 +279,19 @@ function pasangNavigasi() {
 }
 
 /* --------------------------------------------------------------------------
+   PWA: daftarkan service worker
+   -------------------------------------------------------------------------- */
+function daftarkanServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.info('[NutriKala] Service worker terpasang.'))
+      .catch((err) => console.warn('[NutriKala] Gagal memasang service worker:', err));
+  });
+}
+
+/* --------------------------------------------------------------------------
    Pasang event listener
    -------------------------------------------------------------------------- */
 
@@ -376,6 +389,7 @@ function mulai() {
   state.centangAktivitas = muatAktivitasHariIni().centang || {};
   renderCentangAktivitas(state.centangAktivitas);
 
+  daftarkanServiceWorker();
   console.info('[NutriKala] Kalkulator BMI siap.');
 }
 
