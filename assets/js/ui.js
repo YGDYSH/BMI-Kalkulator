@@ -102,6 +102,78 @@ export function renderHasil({ bmi, kategori, pesan, posisi }) {
 }
 
 /* --------------------------------------------------------------------------
+   Nutrisi harian: kalori & makronutrien
+   -------------------------------------------------------------------------- */
+export function renderNutrisi({ kalori, rasio, gram }) {
+  const kaloriNilai = ambil('kaloriNilai');
+  if (kaloriNilai) kaloriNilai.textContent = formatRibuan(kalori);
+
+  const makro = [
+    { nama: 'Karbo', persen: rasio.karbo, gram: gram.karbo },
+    { nama: 'Protein', persen: rasio.protein, gram: gram.protein },
+    { nama: 'Lemak', persen: rasio.lemak, gram: gram.lemak },
+  ];
+
+  makro.forEach((item) => {
+    const persenEl = ambil(`makro${item.nama}Persen`);
+    const gramEl = ambil(`makro${item.nama}Gram`);
+    if (persenEl) persenEl.textContent = `${item.persen}%`;
+    if (gramEl) gramEl.textContent = `± ${item.gram} g`;
+  });
+}
+
+/* --------------------------------------------------------------------------
+   Inspirasi menu rumahan
+   -------------------------------------------------------------------------- */
+export function renderMenu(menu, kalori) {
+  const pembagian = { sarapan: 0.25, siang: 0.4, malam: 0.35 };
+
+  for (const waktu of Object.keys(pembagian)) {
+    const item = menu[waktu];
+    if (!item) continue;
+    const namaEl = ambil(`menu${kapital(waktu)}Nama`);
+    const kkalEl = ambil(`menu${kapital(waktu)}Kkal`);
+    if (namaEl) namaEl.textContent = item.nama;
+    if (kkalEl) kkalEl.textContent = `${formatRibuan(kalori * pembagian[waktu])} kkal`;
+  }
+}
+
+/** Ubah huruf awal menjadi kapital: "sarapan" -> "Sarapan". */
+function kapital(kata) {
+  return kata.charAt(0).toUpperCase() + kata.slice(1);
+}
+
+/* --------------------------------------------------------------------------
+   Aktivitas fisik
+   -------------------------------------------------------------------------- */
+export function renderAktivitas(durasi) {
+  const pemetaan = {
+    jalan: 'durasiJalan',
+    yoga: 'durasiYoga',
+    kekuatan: 'durasiKekuatan',
+  };
+
+  let total = 0;
+  for (const [id, elemenId] of Object.entries(pemetaan)) {
+    const menit = durasi[id] || 0;
+    total += menit;
+    const elemen = ambil(elemenId);
+    if (elemen) elemen.textContent = `${menit} mnt`;
+  }
+
+  const totalEl = ambil('aktivitasTotal');
+  if (totalEl) totalEl.textContent = `${total} menit`;
+}
+
+/* --------------------------------------------------------------------------
+   Kutipan penutup
+   -------------------------------------------------------------------------- */
+export function renderKutipan(teks) {
+  const elemen = ambil('kutipanTeks');
+  if (elemen && teks) elemen.textContent = `“${teks}”`;
+}
+
+/* --------------------------------------------------------------------------
    Toast kecil untuk umpan balik
    -------------------------------------------------------------------------- */
 export function toast(pesan) {

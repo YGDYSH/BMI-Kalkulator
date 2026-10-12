@@ -5,19 +5,33 @@
 
 import {
   RENTANG,
+  RASIO_MAKRO,
   clampRentang,
   hitungBMI,
+  hitungKaloriHarian,
+  hitungGramMakro,
   kategoriBMI,
   pesanKategori,
   posisiPenanda,
 } from './bmi.js';
 
 import {
+  DURASI_AKTIVITAS,
+  acakMenu,
+  pilihKutipan,
+  totalDurasi,
+} from './data.js';
+
+import {
   ambil,
   gulirKe,
   perbaruiSlider,
+  renderAktivitas,
   renderGender,
   renderHasil,
+  renderKutipan,
+  renderMenu,
+  renderNutrisi,
   renderSapaan,
   renderSlider,
   toast,
@@ -31,6 +45,9 @@ const state = {
   tinggi: RENTANG.tinggi.default,
   kategoriTerakhir: '',
   pesanTerakhir: '',
+  kategoriMenuTerakhir: '',
+  rotasiMenu: {},   // indeks menu terakhir, agar tidak berulang beruntun
+  menuTerpilih: null,
 };
 
 /* --------------------------------------------------------------------------
@@ -69,6 +86,63 @@ function tampilkanHasil() {
 }
 
 /* --------------------------------------------------------------------------
+   Rekomendasi kalori, makro, menu, dan aktivitas
+   -------------------------------------------------------------------------- */
+
+/** Terapkan seluruh rekomendasi (kalori/makro/menu/aktivitas) dari state sekarang. */
+function terapkanRekomendasi({ acakMenuBaru = false } = {}) {
+  const bmi = hitungBMI(state.berat, state.tinggi);
+  const kategori = kategoriBMI(bmi);
+  if (!kategori) return false;
+
+  // 1. Kalori harian = BMR × 1,3
+  const kalori = hitungKaloriHarian(state);
+  const rasio = RASIO_MAKRO[kategori.key];
+  const gram = hitungGramMakro(kalori, rasio);
+  renderNutrisi({ kalori, rasio, gram });
+
+  // 2. Inspirasi menu rumahan (rotasi acak, hindari pengulangan beruntun)
+  const kategoriMenuBerubah = state.kategoriMenuTerakhir !== kategori.key;
+  if (acakMenuBaru || kategoriMenuBerubah || !state.menuTerpilih) {
+    if (acakMenuBaru) state.rotasiMenu = {};
+    const menu = acakMenu(kategori.key, state.rotasiMenu);
+    state.menuTerpilih = menu;
+    state.rotasiMenu = {
+      sarapan: menu.sarapan.indeks,
+      siang: menu.siang.indeks,
+      malam: menu.malam.indeks,
+    };
+    state.kategoriMenuTerakhir = kategori.key;
+  }
+  renderMenu(state.menuTerpilih, kalori);
+
+  // 3. Aktivitas fisik (durasi menyesuaikan kategori)
+  const durasi = DURASI_AKTIVITAS[kategori.key];
+  renderAktivitasDurasi(durasi);
+  return true;
+}
+
+/** Kirim durasi aktivitas ke UI (wrapper kecil agar mudah dipantau). */
+function renderAktivitasDurasi(durasi) {
+  renderAktivitas(durasi);
+  return totalDurasi(durasi);
+}
+
+/** Hanya ganti menu (tanpa menghitung ulang BMI/kalori). */
+function saatAcakMenu() {
+  const menu = acakMenu(state.kategoriTerakhir || 'ideal', state.rotasiMenu);
+  state.menuTerpilih = menu;
+  state.rotasiMenu = {
+    sarapan: menu.sarapan.indeks,
+    siang: menu.siang.indeks,
+    malam: menu.malam.indeks,
+  };
+  const kalori = hitungKaloriHarian(state);
+  renderMenu(menu, kalori);
+  toast('Menu baru diacak. Selamat makan, ya!');
+}
+
+/* --------------------------------------------------------------------------
    Aksi tombol
    -------------------------------------------------------------------------- */
 
@@ -85,6 +159,7 @@ function saatCekBMI() {
   state.pesanTerakhir = pesanKategori(kategori.key);
 
   if (tampilkanHasil()) {
+    terapkanRekomendasi({ acakMenuBaru: true });
     toast(`BMI-mu ${bmi.toFixed(1).replace('.', ',')} — ${kategori.label}. Semangat!`);
     gulirKe(ambil('hasilJudul')?.closest('.kartu'));
   }
@@ -95,6 +170,7 @@ function saatGenderDipilih(event) {
   const tombol = event.currentTarget;
   state.gender = tombol.dataset.gender;
   renderGender(state.gender);
+  terapkanRekomendasi(); // BMR wanita/pria berbeda, kalori ikut menyesuaikan
 }
 
 /* --------------------------------------------------------------------------
@@ -112,6 +188,8 @@ function pasangSlider() {
       if (Number(input.value) !== state[id]) input.value = String(state[id]);
       perbaruiSlider(id, state[id]);
       tampilkanHasil();
+      // Kalori & durasi ikut menyesuaikan; menu tetap agar tidak berkedip.
+      terapkanRekomendasi();
     };
 
     input.addEventListener('input', terima);
@@ -128,6 +206,9 @@ function pasangGender() {
 function pasangTombol() {
   const btnCek = ambil('btnCek');
   if (btnCek) btnCek.addEventListener('click', saatCekBMI);
+
+  const btnAcakMenu = ambil('btnAcakMenu');
+  if (btnAcakMenu) btnAcakMenu.addEventListener('click', saatAcakMenu);
 
   const btnNotifikasi = ambil('btnNotifikasi');
   if (btnNotifikasi) {
@@ -153,10 +234,12 @@ function mulai() {
   renderSapaan();
   renderGender(state.gender);
   renderSlider(state);
+  renderKutipan(pilihKutipan());
   pasangSlider();
   pasangGender();
   pasangTombol();
   tampilkanHasil();
+  terapkanRekomendasi({ acakMenuBaru: true });
   console.info('[NutriKala] Kalkulator BMI siap.');
 }
 
