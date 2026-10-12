@@ -350,6 +350,7 @@ button {
   border-radius: var(--r-besar);
   background: var(--c-kartu);
   box-shadow: var(--bayang-kartu);
+  scroll-margin-top: 84px;
 }
 
 .kartu__kepala {
