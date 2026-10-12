@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>NutriKala — Kalkulator BMI &amp; Pola Hidup Sehat</title>
+  <meta name="description" content="NutriKala: kalkulator BMI hangat dengan rekomendasi menu rumahan, panduan nutrisi harian, aktivitas fisik, dan catatan hidrasi.">
+  <meta name="theme-color" content="#ea580c">
+  <link rel="manifest" href="./manifest.json">
+
+  <!-- Font ramah dari Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+<body>
+  <div class="aplikasi">
+
+    <!-- ============ 1. HEADER ============ -->
+    <header class="header">
+      <div class="header__merek">
+        <span class="header__logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"></path>
+          </svg>
+        </span>
+        <span class="header__teks">
+          <span class="header__nama">NutriKala</span>
+          <span class="header__sub">Pola Hidup Sehat Hari Ini</span>
+        </span>
+      </div>
+
+      <button class="header__notifikasi" id="btnNotifikasi" type="button" aria-label="Notifikasi, 2 pesan baru">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 9a6 6 0 1 0-12 0c0 5-2 6.6-2 6.6h16S18 14 18 9Z"></path>
+          <path d="M10.3 19.2a2 2 0 0 0 3.4 0"></path>
+        </svg>
+        <span class="header__titik" aria-hidden="true"></span>
+      </button>
+    </header>
+
+    <!-- ============ TAB: KALKULATOR (semua section) ============ -->
+    <main class="halaman halaman--aktif" id="page-kalkulator" data-page="kalkulator">
+
+      <!-- ============ 2. BANNER MOTIVASI ============ -->
+      <section class="banner" aria-labelledby="bannerJudul">
+        <p class="banner__sapaan" id="sapaan">Selamat Pagi 🌤️</p>
+        <h1 class="banner__judul" id="bannerJudul">Mulai Hari dengan Keseimbangan</h1>
+        <p class="banner__teks">Satu langkah kecil hari ini menjaga tubuh tetap ringan, segar, dan penuh energi.</p>
+      </section>
+
+      <!-- ============ 3. KALKULATOR BMI ============ -->
+      <section class="kartu" aria-labelledby="kalkulatorJudul">
+        <div class="kartu__kepala">
+          <h2 class="kartu__judul" id="kalkulatorJudul">Kalkulator BMI Hangat</h2>
+          <span class="lencana">Metrik Standar</span>
+        </div>
+
+        <!-- Pilihan gender -->
+        <div class="gender" role="group" aria-label="Pilih jenis kelamin">
+          <button class="gender__tombol gender__tombol--aktif" type="button" data-gender="pria" aria-pressed="true">
+            <span aria-hidden="true">👨</span> Pria
+          </button>
+          <button class="gender__tombol" type="button" data-gender="wanita" aria-pressed="false">
+            <span aria-hidden="true">👩</span> Wanita
+          </button>
+        </div>
+
+        <!-- Slider Usia -->
+        <div class="slider">
+          <div class="slider__kepala">
+            <label class="slider__label" for="usia">Usia</label>
+            <output class="slider__nilai" for="usia" id="usiaNilai">25 th</output>
+          </div>
+          <input class="slider__input" type="range" id="usia" min="10" max="90" step="1" value="25"
+                 aria-describedby="usiaRentang">
+          <div class="slider__rentang" id="usiaRentang"><span>10</span><span>90 tahun</span></div>
+        </div>
+
+        <!-- Slider Berat -->
+        <div class="slider">
+          <div class="slider__kepala">
+            <label class="slider__label" for="berat">Berat Badan</label>
+            <output class="slider__nilai" for="berat" id="beratNilai">70 kg</output>
+          </div>
+          <input class="slider__input" type="range" id="berat" min="30" max="200" step="1" value="70"
+                 aria-describedby="beratRentang">
+          <div class="slider__rentang" id="beratRentang"><span>30</span><span>200 kg</span></div>
+        </div>
+
+        <!-- Slider Tinggi -->
+        <div class="slider">
+          <div class="slider__kepala">
+            <label class="slider__label" for="tinggi">Tinggi Badan</label>
+            <output class="slider__nilai" for="tinggi" id="tinggiNilai">165 cm</output>
+          </div>
+          <input class="slider__input" type="range" id="tinggi" min="120" max="220" step="1" value="165"
+                 aria-describedby="tinggiRentang">
+          <div class="slider__rentang" id="tinggiRentang"><span>120</span><span>220 cm</span></div>
+        </div>
+
+        <button class="tombol tombol--utama" id="btnCek" type="button">
+          Cek BMI &amp; Rekomendasi Menu
+        </button>
+      </section>
+
+      <!-- ============ 4. HASIL PENGUKURAN ============ -->
+      <section class="kartu" aria-labelledby="hasilJudul">
+        <div class="kartu__kepala">
+          <h2 class="kartu__judul" id="hasilJudul">Hasil Pengukuran</h2>
+        </div>
+
+        <div class="hasil__ringkas" aria-live="polite" aria-atomic="true">
+          <p class="hasil__nilai">
+            <span class="hasil__angka" id="bmiNilai">22,5</span>
+            <span class="hasil__satuan">BMI</span>
+          </p>
+          <span class="lencana lencana--kategori" id="bmiKategori">Ideal &amp; Seimbang</span>
+        </div>
+
+        <!-- Bar tiga warna dengan penanda posisi BMI -->
+        <div class="skala" aria-hidden="true">
+          <div class="skala__bar">
+            <span class="skala__segmen skala__segmen--kurang"></span>
+            <span class="skala__segmen skala__segmen--ideal"></span>
+            <span class="skala__segmen skala__segmen--lebih"></span>
+            <span class="skala__penanda" id="skalaPenanda">
+              <span class="skala__penandaNilai" id="skalaNilai">22,5</span>
+            </span>
+          </div>
+          <div class="skala__label">
+            <span>Kurang &lt;18,5</span>
+            <span>Ideal 18,5–24,9</span>
+            <span>Lebih ≥25</span>
+          </div>
+        </div>
+
+        <p class="hasil__pesan" id="bmiPesan">
+          Beratmu sekarang berada di jalur yang seimbang. Pertahankan porsi dan gerak harianmu, ya!
+        </p>
+
+        <p class="catatan">
+          Catatan lembut: BMI hanyalah indikator kasar dan bukan pengganti saran dokter atau ahli gizi.
+        </p>
+      </section>
+
+      <!-- ============ 5. PANDUAN PIRING & NUTRISI ============ -->
+      <section class="kartu" aria-labelledby="nutrisiJudul">
+        <div class="kartu__kepala">
+          <h2 class="kartu__judul" id="nutrisiJudul">Panduan Piring &amp; Nutrisi Harian</h2>
+        </div>
+
+        <div class="kalori">
+          <span class="kalori__label">Kebutuhan kalori harian</span>
+          <p class="kalori__nilai"><span id="kaloriNilai">1.950</span> <small>kkal</small></p>
+          <span class="kalori__ket">BMR Mifflin-St Jeor × faktor aktivitas 1,3</span>
+        </div>
+
+        <div class="makro">
+          <div class="makro__kartu">
+            <span class="makro__ikon" aria-hidden="true">🍚</span>
+            <p class="makro__nama">Karbo Kompleks</p>
+            <p class="makro__persen" id="makroKarboPersen">50%</p>
+            <p class="makro__gram" id="makroKarboGram">± 244 g</p>
+          </div>
+          <div class="makro__kartu">
+            <span class="makro__ikon" aria-hidden="true">🍗</span>
+            <p class="makro__nama">Protein Bersih</p>
+            <p class="makro__persen" id="makroProteinPersen">25%</p>
+            <p class="makro__gram" id="makroProteinGram">± 122 g</p>
+          </div>
+          <div class="makro__kartu">
+            <span class="makro__ikon" aria-hidden="true">🥑</span>
+            <p class="makro__nama">Lemak Sehat</p>
+            <p class="makro__persen" id="makroLemakPersen">25%</p>
+            <p class="makro__gram" id="makroLemakGram">± 54 g</p>
+          </div>
+        </div>
+
+        <h3 class="subjudul">Inspirasi Menu Rumahan Hangat</h3>
+        <ul class="menu">
+          <li class="menu__baris">
+            <span class="menu__waktu">Sarapan</span>
+            <span class="menu__isi">
+              <span class="menu__nama" id="menuSarapanNama">Bubur Ayam Hangat</span>
+              <span class="menu__kkal" id="menuSarapanKkal">488 kkal</span>
+            </span>
+          </li>
+          <li class="menu__baris">
+            <span class="menu__waktu">Makan Siang</span>
+            <span class="menu__isi">
+              <span class="menu__nama" id="menuSiangNama">Nasi Ayam Serundeng</span>
+              <span class="menu__kkal" id="menuSiangKkal">780 kkal</span>
+            </span>
+          </li>
+          <li class="menu__baris">
+            <span class="menu__waktu">Makan Malam</span>
+            <span class="menu__isi">
+              <span class="menu__nama" id="menuMalamNama">Sup Ikan Sayur Hangat</span>
+              <span class="menu__kkal" id="menuMalamKkal">683 kkal</span>
+            </span>
+          </li>
+        </ul>
+        <button class="tombol tombol--garis" id="btnAcakMenu" type="button">🔄 Acak Inspirasi Menu</button>
+      </section>
+
+      <!-- ============ 6. AKTIVITAS FISIK ============ -->
+      <section class="kartu" aria-labelledby="aktivitasJudul">
+        <div class="kartu__kepala">
+          <h2 class="kartu__judul" id="aktivitasJudul">Aktivitas Fisik Menyegarkan</h2>
+          <span class="lencana" id="aktivitasTotal">65 menit</span>
+        </div>
+
+        <ul class="aktivitas">
+          <li class="aktivitas__baris">
+            <label class="aktivitas__label" for="akt-jalan">
+              <input class="aktivitas__centang" type="checkbox" id="akt-jalan" data-aktivitas="jalan">
+              <span class="aktivitas__kotak" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19 7.5"></path></svg>
+              </span>
+              <span class="aktivitas__ikon" aria-hidden="true">🚶</span>
+              <span class="aktivitas__teks">
+                <span class="aktivitas__nama">Jalan Pagi &amp; Udara Segar</span>
+                <span class="aktivitas__durasi" id="durasiJalan">30 mnt</span>
+              </span>
+            </label>
+          </li>
+          <li class="aktivitas__baris">
+            <label class="aktivitas__label" for="akt-yoga">
+              <input class="aktivitas__centang" type="checkbox" id="akt-yoga" data-aktivitas="yoga">
+              <span class="aktivitas__kotak" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19 7.5"></path></svg>
+              </span>
+              <span class="aktivitas__ikon" aria-hidden="true">🧘</span>
+              <span class="aktivitas__teks">
+                <span class="aktivitas__nama">Yoga &amp; Peregangan Otot</span>
+                <span class="aktivitas__durasi" id="durasiYoga">20 mnt</span>
+              </span>
+            </label>
+          </li>
+          <li class="aktivitas__baris">
+            <label class="aktivitas__label" for="akt-kekuatan">
+              <input class="aktivitas__centang" type="checkbox" id="akt-kekuatan" data-aktivitas="kekuatan">
+              <span class="aktivitas__kotak" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19 7.5"></path></svg>
+              </span>
+              <span class="aktivitas__ikon" aria-hidden="true">🏋️</span>
+              <span class="aktivitas__teks">
+                <span class="aktivitas__nama">Latihan Kekuatan Ringan</span>
+                <span class="aktivitas__durasi" id="durasiKekuatan">15 mnt</span>
+              </span>
+            </label>
+          </li>
+        </ul>
+        <p class="catatan">Total durasi hari ini otomatis menyesuaikan kategori BMI-mu. Centang yang sudah selesai.</p>
+      </section>
+
+      <!-- ============ 7. HIDRASI ============ -->
+      <section class="kartu" aria-labelledby="airJudul">
+        <div class="kartu__kepala">
+          <h2 class="kartu__judul" id="airJudul">Catatan Hidrasi Segar</h2>
+          <span class="lencana" id="airTarget">2,4 L</span>
+        </div>
+
+        <div class="air__bar" id="airBar" role="progressbar" aria-label="Progres minum air hari ini"
+             aria-valuemin="0" aria-valuemax="10" aria-valuenow="6">
+          <span class="air__isi" id="airIsi"></span>
+        </div>
+        <p class="air__teks" id="airTeks">6 dari 10 gelas · target 2,4 L (berat × 34 ml)</p>
+
+        <div class="air__tombol">
+          <button class="tombol tombol--utama" id="btnTambahAir" type="button">+1 Gelas</button>
+          <button class="tombol tombol--garis" id="btnUndoAir" type="button">−1 Undo</button>
+        </div>
+      </section>
+
+      <!-- ============ 8. KUTIPAN PENUTUP ============ -->
+      <figure class="kutipan">
+        <blockquote class="kutipan__teks" id="kutipanTeks">
+          “Kesehatan bukan soal sempurna, melainkan soal kebiasaan kecil yang kamu ulang setiap hari.”
+        </blockquote>
+        <figcaption class="kutipan__sumber">— NutriKala, tetap pelan tapi pasti 🌿</figcaption>
+      </figure>
+    </main>
+
+    <!-- ============ TAB PLACEHOLDER LAIN ============ -->
+    <main class="halaman halaman--placeholder" id="page-pola-makan" data-page="pola-makan" hidden>
+      <div class="placeholder">
+        <span class="placeholder__ikon" aria-hidden="true">🍽️</span>
+        <h2 class="placeholder__judul">Pola Makan</h2>
+        <p class="placeholder__teks">Jadwal makan mingguan, daftar belanja, dan resep rumahan sedang kami siapkan hangat-hangat untukmu.</p>
+        <span class="placeholder__chip">Segera hadir</span>
+      </div>
+    </main>
+
+    <main class="halaman halaman--placeholder" id="page-olahraga" data-page="olahraga" hidden>
+      <div class="placeholder">
+        <span class="placeholder__ikon" aria-hidden="true">🏃</span>
+        <h2 class="placeholder__judul">Olahraga</h2>
+        <p class="placeholder__teks">Rencana gerak harian, video peregangan, dan tantangan langkah sedang dalam perjalanan.</p>
+        <span class="placeholder__chip">Segera hadir</span>
+      </div>
+    </main>
+
+    <main class="halaman halaman--placeholder" id="page-akun" data-page="akun" hidden>
+      <div class="placeholder">
+        <span class="placeholder__ikon" aria-hidden="true">👤</span>
+        <h2 class="placeholder__judul">Akun</h2>
+        <p class="placeholder__teks">Profil, target pribadi, dan riwayat BMI akan tinggal di sini. Sabar ya, segera hadir.</p>
+        <span class="placeholder__chip">Segera hadir</span>
+      </div>
+    </main>
+
+    <!-- ============ 9. BOTTOM NAVIGATION ============ -->
+    <nav class="nav" aria-label="Navigasi utama">
+      <button class="nav__item nav__item--aktif" type="button" data-tab="kalkulator" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4" y="2.6" width="16" height="18.8" rx="3.4"></rect>
+          <path d="M8 7.2h8M8.4 12h.01M12 12h.01M15.6 12h.01M8.4 16.4h.01M12 16.4h.01M15.6 16.4h.01"></path>
+        </svg>
+        <span class="nav__label">Kalkulator</span>
+      </button>
+
+      <button class="nav__item" type="button" data-tab="pola-makan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3.6 11h16.8a8.4 8.4 0 0 1-16.8 0Z"></path>
+          <path d="M9 7.4c0-1.3 1-1.7 1-3M13.4 7.4c0-1.3 1-1.7 1-3"></path>
+          <path d="M2.6 21h18.8"></path>
+        </svg>
+        <span class="nav__label">Pola Makan</span>
+      </button>
+
+      <button class="nav__item" type="button" data-tab="olahraga">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6.6 6.6v10.8M3.4 9.2v5.6M17.4 6.6v10.8M20.6 9.2v5.6M6.6 12h10.8"></path>
+        </svg>
+        <span class="nav__label">Olahraga</span>
+      </button>
+
+      <button class="nav__item" type="button" data-tab="akun">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="8.2" r="3.6"></circle>
+          <path d="M4.8 20a7.4 7.4 0 0 1 14.4 0"></path>
+        </svg>
+        <span class="nav__label">Akun</span>
+      </button>
+    </nav>
+
+    <!-- Toast sederhana untuk notifikasi -->
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  </div>
+
+  <script type="module" src="./assets/js/app.js"></script>
+</body>
+</html>
