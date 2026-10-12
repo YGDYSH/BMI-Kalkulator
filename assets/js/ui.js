@@ -174,6 +174,47 @@ export function renderKutipan(teks) {
 }
 
 /* --------------------------------------------------------------------------
+   Hidrasi
+   -------------------------------------------------------------------------- */
+export function renderAir(status) {
+  const badge = ambil('airTarget');
+  if (badge) badge.textContent = `${status.targetLiter} L`;
+
+  const isi = ambil('airIsi');
+  if (isi) isi.style.width = `${status.persen}%`;
+
+  const teks = ambil('airTeks');
+  if (teks) {
+    teks.textContent = `${status.terisi} dari ${status.targetGelas} gelas`
+      + ` · target ${status.targetLiter} L (berat × 34 ml)`;
+  }
+
+  const bar = ambil('airBar');
+  if (bar) {
+    bar.setAttribute('aria-valuemax', String(status.targetGelas));
+    bar.setAttribute('aria-valuenow', String(status.terisi));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Centang aktivitas
+   -------------------------------------------------------------------------- */
+export function renderCentangAktivitas(centang) {
+  document.querySelectorAll('[data-aktivitas]').forEach((centangEl) => {
+    centangEl.checked = Boolean(centang[centangEl.dataset.aktivitas]);
+  });
+}
+
+/** Baca status centang aktivitas langsung dari DOM. */
+export function bacaCentangAktivitas() {
+  const hasil = {};
+  document.querySelectorAll('[data-aktivitas]').forEach((centangEl) => {
+    hasil[centangEl.dataset.aktivitas] = Boolean(centangEl.checked);
+  });
+  return hasil;
+}
+
+/* --------------------------------------------------------------------------
    Toast kecil untuk umpan balik
    -------------------------------------------------------------------------- */
 export function toast(pesan) {

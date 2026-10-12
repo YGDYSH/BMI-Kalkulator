@@ -1,6 +1,6 @@
 /* ==========================================================================
-   app.js — Titik masuk aplikasi: menyambungkan logika (bmi.js) dan
-   tampilan (ui.js). Dimuat sebagai ES Module.
+   app.js — Titik masuk aplikasi: menyambungkan logika (bmi.js, hydration.js,
+   data.js, storage.js) dan tampilan (ui.js). Dimuat sebagai ES Module.
    ========================================================================== */
 
 import {
@@ -19,14 +19,32 @@ import {
   DURASI_AKTIVITAS,
   acakMenu,
   pilihKutipan,
-  totalDurasi,
 } from './data.js';
 
 import {
+  muatAirHariIni,
+  muatAktivitasHariIni,
+  muatInputPengguna,
+  simpanAktivitas,
+  simpanHasilTerakhir,
+  simpanInputPengguna,
+  catatRiwayatBMI,
+} from './storage.js';
+
+import {
+  kurangiGelas,
+  muatStatusAir,
+  tambahGelas,
+} from './hydration.js';
+
+import {
   ambil,
+  bacaCentangAktivitas,
   gulirKe,
   perbaruiSlider,
   renderAktivitas,
+  renderAir,
+  renderCentangAktivitas,
   renderGender,
   renderHasil,
   renderKutipan,
@@ -37,7 +55,7 @@ import {
   toast,
 } from './ui.js';
 
-/** Status input terakhir dari pengguna. */
+/** Status aplikasi (input + turunan yang tidak perlu dihitung ulang). */
 const state = {
   gender: 'pria',
   usia: RENTANG.usia.default,
@@ -48,6 +66,8 @@ const state = {
   kategoriMenuTerakhir: '',
   rotasiMenu: {},   // indeks menu terakhir, agar tidak berulang beruntun
   menuTerpilih: null,
+  statusAir: null,  // status hidrasi hari ini
+  centangAktivitas: {}, // aktivitas yang dicentang hari ini
 };
 
 /* --------------------------------------------------------------------------
@@ -117,18 +137,94 @@ function terapkanRekomendasi({ acakMenuBaru = false } = {}) {
   renderMenu(state.menuTerpilih, kalori);
 
   // 3. Aktivitas fisik (durasi menyesuaikan kategori)
-  const durasi = DURASI_AKTIVITAS[kategori.key];
-  renderAktivitasDurasi(durasi);
+  renderAktivitas(DURASI_AKTIVITAS[kategori.key]);
+
+  // 4. Hidrasi (target ikut menyesuaikan berat badan)
+  perbaruiAir();
   return true;
 }
 
-/** Kirim durasi aktivitas ke UI (wrapper kecil agar mudah dipantau). */
-function renderAktivitasDurasi(durasi) {
-  renderAktivitas(durasi);
-  return totalDurasi(durasi);
+/* --------------------------------------------------------------------------
+   Hidrasi
+   -------------------------------------------------------------------------- */
+
+/** Hitung ulang & render status air berdasarkan berat badan sekarang. */
+function perbaruiAir() {
+  state.statusAir = muatStatusAir(state.berat);
+  renderAir(state.statusAir);
 }
 
-/** Hanya ganti menu (tanpa menghitung ulang BMI/kalori). */
+/** Aksi +1 gelas. */
+function saatTambahAir() {
+  if (!state.statusAir) perbaruiAir();
+  state.statusAir = tambahGelas(state.berat);
+  renderAir(state.statusAir);
+  if (state.statusAir.selesai) {
+    toast('Target hidrasi hari ini tercapai. Kerja bagus!');
+  } else {
+    toast(`Air ditambah. ${state.statusAir.terisi} dari ${state.statusAir.targetGelas} gelas.`);
+  }
+}
+
+/** Aksi undo (-1 gelas). */
+function saatUndoAir() {
+  if (!state.statusAir) perbaruiAir();
+  state.statusAir = kurangiGelas(state.berat);
+  renderAir(state.statusAir);
+  toast(`Gelas dikurangi. ${state.statusAir.terisi} dari ${state.statusAir.targetGelas} gelas.`);
+}
+
+/* --------------------------------------------------------------------------
+   Aktivitas dicentang
+   -------------------------------------------------------------------------- */
+
+/** Simpan status centang aktivitas hari ini ke storage. */
+function saatCentangAktivitas() {
+  state.centangAktivitas = bacaCentangAktivitas();
+  const tersimpan = simpanAktivitas({ centang: state.centangAktivitas });
+  if (!tersimpan) {
+    toast('Pusatat gagal tersimpan (mungkin penyimpanan penuh).');
+    return;
+  }
+  const jumlah = Object.values(state.centangAktivitas).filter(Boolean).length;
+  if (jumlah > 0) toast(`Kerja bagus! ${jumlah} aktivitas hari ini selesai.`);
+}
+
+/* --------------------------------------------------------------------------
+   Aksi tombol
+   -------------------------------------------------------------------------- */
+
+/** Aksi utama: "Cek BMI & Rekomendasi Menu". */
+function saatCekBMI() {
+  const bmi = hitungBMI(state.berat, state.tinggi);
+  const kategori = kategoriBMI(bmi);
+  if (!kategori) {
+    toast('Ups, periksa lagi berat dan tinggimu ya.');
+    return;
+  }
+  state.kategoriTerakhir = kategori.key;
+  state.pesanTerakhir = pesanKategori(kategori.key);
+
+  if (tampilkanHasil()) {
+    terapkanRekomendasi({ acakMenuBaru: true });
+    // Simpan hasil & catat riwayat untuk grafik berikutnya.
+    simpanHasilTerakhir({ bmi, kategori });
+    catatRiwayatBMI(bmi);
+    toast(`BMI-mu ${bmi.toFixed(1).replace('.', ',')} — ${kategori.label}. Semangat!`);
+    gulirKe(ambil('hasilJudul')?.closest('.kartu'));
+  }
+}
+
+/** Klik salah satu tombol gender. */
+function saatGenderDipilih(event) {
+  const tombol = event.currentTarget;
+  state.gender = tombol.dataset.gender;
+  renderGender(state.gender);
+  simpanInputPengguna(state);
+  terapkanRekomendasi(); // BMR wanita/pria berbeda, kalori ikut menyesuaikan
+}
+
+/** Klik "Acak Inspirasi Menu". */
 function saatAcakMenu() {
   const menu = acakMenu(state.kategoriTerakhir || 'ideal', state.rotasiMenu);
   state.menuTerpilih = menu;
@@ -143,37 +239,6 @@ function saatAcakMenu() {
 }
 
 /* --------------------------------------------------------------------------
-   Aksi tombol
-   -------------------------------------------------------------------------- */
-
-/** Aksi utama: "Cek BMI & Rekomendasi Menu". */
-function saatCekBMI() {
-  // Paksa pesan baru agar pengguna merasa mendapat rekomendasi segar.
-  const bmi = hitungBMI(state.berat, state.tinggi);
-  const kategori = kategoriBMI(bmi);
-  if (!kategori) {
-    toast('Ups, periksa lagi berat dan tinggimu ya.');
-    return;
-  }
-  state.kategoriTerakhir = kategori.key;
-  state.pesanTerakhir = pesanKategori(kategori.key);
-
-  if (tampilkanHasil()) {
-    terapkanRekomendasi({ acakMenuBaru: true });
-    toast(`BMI-mu ${bmi.toFixed(1).replace('.', ',')} — ${kategori.label}. Semangat!`);
-    gulirKe(ambil('hasilJudul')?.closest('.kartu'));
-  }
-}
-
-/** Klik salah satu tombol gender. */
-function saatGenderDipilih(event) {
-  const tombol = event.currentTarget;
-  state.gender = tombol.dataset.gender;
-  renderGender(state.gender);
-  terapkanRekomendasi(); // BMR wanita/pria berbeda, kalori ikut menyesuaikan
-}
-
-/* --------------------------------------------------------------------------
    Pasang event listener
    -------------------------------------------------------------------------- */
 
@@ -184,12 +249,11 @@ function pasangSlider() {
 
     const terima = () => {
       state[id] = clampRentang(id, input.value);
-      // Pastikan nilai di dalam input ikut terkoreksi bila di luar rentang.
       if (Number(input.value) !== state[id]) input.value = String(state[id]);
       perbaruiSlider(id, state[id]);
       tampilkanHasil();
-      // Kalori & durasi ikut menyesuaikan; menu tetap agar tidak berkedip.
       terapkanRekomendasi();
+      simpanInputPengguna(state);
     };
 
     input.addEventListener('input', terima);
@@ -210,22 +274,43 @@ function pasangTombol() {
   const btnAcakMenu = ambil('btnAcakMenu');
   if (btnAcakMenu) btnAcakMenu.addEventListener('click', saatAcakMenu);
 
+  const btnTambahAir = ambil('btnTambahAir');
+  if (btnTambahAir) btnTambahAir.addEventListener('click', saatTambahAir);
+
+  const btnUndoAir = ambil('btnUndoAir');
+  if (btnUndoAir) btnUndoAir.addEventListener('click', saatUndoAir);
+
   const btnNotifikasi = ambil('btnNotifikasi');
   if (btnNotifikasi) {
     btnNotifikasi.addEventListener('click', () => {
       toast('Belum ada kabar baru. Cek lagi nanti ya!');
     });
   }
+
+  document.querySelectorAll('[data-aktivitas]').forEach((centang) => {
+    centang.addEventListener('change', saatCentangAktivitas);
+  });
 }
 
 /* --------------------------------------------------------------------------
    Mulai aplikasi
    -------------------------------------------------------------------------- */
-/** Ambil nilai awal langsung dari elemen slider di HTML. */
+
+/** Muat nilai awal: utamakan penyimpanan, fallback ke nilai di HTML. */
 function muatNilaiAwal() {
+  const tersimpan = muatInputPengguna({
+    gender: state.gender,
+    usia: state.usia,
+    berat: state.berat,
+    tinggi: state.tinggi,
+  });
+
+  state.gender = tersimpan.gender;
   ['usia', 'berat', 'tinggi'].forEach((id) => {
     const input = ambil(id);
-    if (input) state[id] = clampRentang(id, input.value);
+    const nilai = clampRentang(id, tersimpan[id]);
+    state[id] = nilai;
+    if (input) input.value = String(nilai);
   });
 }
 
@@ -240,6 +325,11 @@ function mulai() {
   pasangTombol();
   tampilkanHasil();
   terapkanRekomendasi({ acakMenuBaru: true });
+
+  // Muat aktivitas yang sudah dicentang hari ini.
+  state.centangAktivitas = muatAktivitasHariIni().centang || {};
+  renderCentangAktivitas(state.centangAktivitas);
+
   console.info('[NutriKala] Kalkulator BMI siap.');
 }
 
