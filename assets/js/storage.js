@@ -10,6 +10,7 @@ const KEY = {
   air: 'nutrikala:air',
   aktivitas: 'nutrikala:aktivitas',
   riwayat: 'nutrikala:riwayat-bmi',
+  tab: 'nutrikala:tab',
 };
 
 /** Batas entri riwayat BMI. */
@@ -192,4 +193,17 @@ export function simpanAktivitas(data) {
     tanggal: data.tanggal || tanggalHariIni(),
     centang: data.centang && typeof data.centang === 'object' ? data.centang : {},
   });
+}
+
+/* --------------------------------------------------------------------------
+   Tab navigasi terakhir
+   -------------------------------------------------------------------------- */
+
+export function muatTabAktif(fallback) {
+  const data = amanAmbil(KEY.tab);
+  return typeof data === 'string' && data ? data : fallback;
+}
+
+export function simpanTabAktif(tab) {
+  return amanSimpan(KEY.tab, tab);
 }

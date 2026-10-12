@@ -215,6 +215,43 @@ export function bacaCentangAktivitas() {
 }
 
 /* --------------------------------------------------------------------------
+   Navigasi tab bawah
+   -------------------------------------------------------------------------- */
+
+/**
+ * Tampilkan halaman sesuai tab, perbarui state tombol navigasi.
+ * Hanya satu `main.halaman` yang terlihat pada satu waktu.
+ */
+export function renderHalaman(tab) {
+  document.querySelectorAll('.halaman[data-page]').forEach((halaman) => {
+    const aktif = halaman.dataset.page === tab;
+    halaman.hidden = !aktif;
+    halaman.classList.toggle('halaman--aktif', aktif);
+    if (aktif) {
+      // Siapkan fokus untuk pembaca layar saat halaman berubah.
+      halaman.setAttribute('tabindex', '-1');
+    }
+  });
+
+  // Hanya tombol di bottom navigation yang diberi state aktif.
+  document.querySelectorAll('.nav__item[data-tab]').forEach((tombol) => {
+    const aktif = tombol.dataset.tab === tab;
+    tombol.classList.toggle('nav__item--aktif', aktif);
+    if (aktif) {
+      tombol.setAttribute('aria-current', 'page');
+    } else {
+      tombol.removeAttribute('aria-current');
+    }
+  });
+}
+
+/** Fokuskan halaman aktif (untuk screen reader setelah pindah tab). */
+export function fokusHalaman(tab) {
+  const halaman = document.getElementById(`page-${tab}`);
+  if (halaman) halaman.focus({ preventScroll: true });
+}
+
+/* --------------------------------------------------------------------------
    Toast kecil untuk umpan balik
    -------------------------------------------------------------------------- */
 export function toast(pesan) {

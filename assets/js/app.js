@@ -25,9 +25,11 @@ import {
   muatAirHariIni,
   muatAktivitasHariIni,
   muatInputPengguna,
+  muatTabAktif,
   simpanAktivitas,
   simpanHasilTerakhir,
   simpanInputPengguna,
+  simpanTabAktif,
   catatRiwayatBMI,
 } from './storage.js';
 
@@ -40,12 +42,14 @@ import {
 import {
   ambil,
   bacaCentangAktivitas,
+  fokusHalaman,
   gulirKe,
   perbaruiSlider,
   renderAktivitas,
   renderAir,
   renderCentangAktivitas,
   renderGender,
+  renderHalaman,
   renderHasil,
   renderKutipan,
   renderMenu,
@@ -54,6 +58,9 @@ import {
   renderSlider,
   toast,
 } from './ui.js';
+
+/** Daftar tab yang valid (digunakan untuk validasi navigasi). */
+const TAB_VALID = ['kalkulator', 'pola-makan', 'olahraga', 'akun'];
 
 /** Status aplikasi (input + turunan yang tidak perlu dihitung ulang). */
 const state = {
@@ -68,6 +75,8 @@ const state = {
   menuTerpilih: null,
   statusAir: null,  // status hidrasi hari ini
   centangAktivitas: {}, // aktivitas yang dicentang hari ini
+  tabAktif: 'kalkulator',
+  scrollPerTab: {}, // posisi gulir per tab (hanya di memori)
 };
 
 /* --------------------------------------------------------------------------
@@ -239,6 +248,37 @@ function saatAcakMenu() {
 }
 
 /* --------------------------------------------------------------------------
+   Navigasi tab bawah
+   -------------------------------------------------------------------------- */
+
+/** Pindah ke tab lain: tampilkan halaman, simpan posisi gulir, simpan pilihan. */
+function pindahTab(tab) {
+  if (!TAB_VALID.includes(tab) || tab === state.tabAktif) return;
+
+  // Ingat posisi gulir tab sebelumnya.
+  state.scrollPerTab[state.tabAktif] = window.scrollY || 0;
+
+  state.tabAktif = tab;
+  renderHalaman(tab);
+  simpanTabAktif(tab);
+
+  // Kembalikan posisi gulir tab yang dituju (bila pernah dikunjungi).
+  const posisi = state.scrollPerTab[tab] || 0;
+  window.scrollTo({ top: posisi, left: 0, behavior: 'auto' });
+  fokusHalaman(tab);
+
+  if (tab !== 'kalkulator') {
+    toast('Fitur ini sedang disiapkan. Segera hadir!');
+  }
+}
+
+function pasangNavigasi() {
+  document.querySelectorAll('[data-tab]').forEach((tombol) => {
+    tombol.addEventListener('click', () => pindahTab(tombol.dataset.tab));
+  });
+}
+
+/* --------------------------------------------------------------------------
    Pasang event listener
    -------------------------------------------------------------------------- */
 
@@ -315,11 +355,17 @@ function muatNilaiAwal() {
 }
 
 function mulai() {
+  // Tab terakhir yang dibuka (default: kalkulator), bila tidak valid pakai awal.
+  const tabTersimpan = muatTabAktif('kalkulator');
+  state.tabAktif = TAB_VALID.includes(tabTersimpan) ? tabTersimpan : 'kalkulator';
+
   muatNilaiAwal();
   renderSapaan();
   renderGender(state.gender);
   renderSlider(state);
   renderKutipan(pilihKutipan());
+  renderHalaman(state.tabAktif);
+  pasangNavigasi();
   pasangSlider();
   pasangGender();
   pasangTombol();
