@@ -25,6 +25,7 @@ import {
   muatAirHariIni,
   muatAktivitasHariIni,
   muatInputPengguna,
+  muatProfil,
   muatTabAktif,
   simpanAktivitas,
   simpanHasilTerakhir,
@@ -38,6 +39,8 @@ import {
   muatStatusAir,
   tambahGelas,
 } from './hydration.js';
+
+import { renderProfilePage } from './profile.js';
 
 import {
   ambil,
@@ -248,6 +251,40 @@ function saatAcakMenu() {
 }
 
 /* --------------------------------------------------------------------------
+   Pra-isi kalkulator BMI dari profil (Fase 1, tugas 1.4)
+   -------------------------------------------------------------------------- */
+
+/**
+ * Terapkan profil ke kalkulator BMI (gender, usia, berat, tinggi).
+ * Kalkulator tetap bisa dipakai tanpa profil — profil hanya isi awal.
+ */
+function terapkanProfilKeKalkulator(profil) {
+  if (!profil) return;
+  state.gender = profil.sex === 'female' ? 'wanita' : 'pria';
+  // Slider kalkulator punya rentang sendiri (mis. 10–90 th); ikuti batasnya.
+  state.usia = clampRentang('usia', profil.usia);
+  state.berat = clampRentang('berat', profil.weightKg);
+  state.tinggi = clampRentang('tinggi', profil.heightCm);
+
+  ['usia', 'berat', 'tinggi'].forEach((id) => {
+    const input = ambil(id);
+    if (input) input.value = String(state[id]);
+  });
+  renderGender(state.gender);
+  renderSlider(state);
+  simpanInputPengguna(state);
+  tampilkanHasil();
+  terapkanRekomendasi();
+}
+
+/** Callback dari halaman Akun: profil disimpan/diimpor/dihapus. */
+function saatProfilTersimpan(profil) {
+  if (profil) {
+    terapkanProfilKeKalkulator(profil);
+  }
+}
+
+/* --------------------------------------------------------------------------
    Navigasi tab bawah
    -------------------------------------------------------------------------- */
 
@@ -369,6 +406,12 @@ function mulai() {
   state.tabAktif = TAB_VALID.includes(tabTersimpan) ? tabTersimpan : 'kalkulator';
 
   muatNilaiAwal();
+
+  // Profil (jika sudah diisi) mengambil isi awal kalkulator (tugas 1.4).
+  if (muatProfil()) {
+    terapkanProfilKeKalkulator(muatProfil());
+  }
+
   renderSapaan();
   renderGender(state.gender);
   renderSlider(state);
@@ -384,6 +427,11 @@ function mulai() {
   // Muat aktivitas yang sudah dicentang hari ini.
   state.centangAktivitas = muatAktivitasHariIni().centang || {};
   renderCentangAktivitas(state.centangAktivitas);
+
+  // Halaman Akun (Fase 1): siapkan sekali di awal agar tab langsung hidup.
+  renderProfilePage(ambil('page-akun'), {
+    onProfilTersimpan: saatProfilTersimpan,
+  });
 
   daftarkanServiceWorker();
   console.info('[NutriKala] Kalkulator BMI siap.');
