@@ -266,10 +266,6 @@ function pindahTab(tab) {
   const posisi = state.scrollPerTab[tab] || 0;
   window.scrollTo({ top: posisi, left: 0, behavior: 'auto' });
   fokusHalaman(tab);
-
-  if (tab !== 'kalkulator') {
-    toast('Fitur ini sedang disiapkan. Segera hadir!');
-  }
 }
 
 function pasangNavigasi() {
