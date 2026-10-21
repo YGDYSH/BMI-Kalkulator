@@ -32,6 +32,7 @@
 **Navigasi bawah (4 tab):** Kalkulator · Pola Makan · Olahraga · Akun.
 
 **Status saat ini:**
+
 - Tab **Kalkulator**: sudah berfungsi.
 - Tab **Pola Makan**, **Olahraga**, **Akun**: masih placeholder ("Segera hadir" + toast "Fitur ini sedang disiapkan. Segera hadir!").
 
@@ -51,7 +52,7 @@
 8. **Offline-first.** Setiap file JS/CSS baru wajib ditambahkan ke daftar cache di `sw.js`, dan **naikkan versi cache** agar pembaruan sampai ke pengguna.
 9. **Keamanan data.** Jangan gunakan `innerHTML` dengan input pengguna mentah. Gunakan `textContent` atau escape terlebih dahulu.
 10. **Jangan merusak fitur yang sudah jalan** (BMI, hidrasi). Lakukan pengecekan manual setelah tiap fase.
-11. **Commit kecil dan sering**, satu commit per tugas, dengan pesan jelas (contoh: `feat(profile): tambah form profil`).
+11. **Jangan menjalankan perintah git apa pun (commit, push, branch). Biarkan perubahan di working directory agar saya review dan commit sendiri.
 
 ---
 
@@ -76,7 +77,9 @@ Setiap halaman diekspos sebagai modul dengan antarmuka seragam. Sesuaikan dengan
 
 ```js
 // contoh antarmuka yang diharapkan
-export function renderMealsPage(container) { /* render + pasang event */ }
+export function renderMealsPage(container) {
+  /* render + pasang event */
+}
 ```
 
 `app.js` memanggil fungsi render sesuai tab aktif, menggantikan placeholder "Segera hadir".
@@ -85,16 +88,16 @@ export function renderMealsPage(container) { /* render + pasang event */ }
 
 Gunakan prefiks `nutrikala:`. Cek kunci yang sudah dipakai `bmi.js` dan `hydration.js`, jangan bentrok.
 
-| Kunci | Isi |
-|---|---|
-| `nutrikala:profile` | Objek profil pengguna |
-| `nutrikala:weightLog` | Array `{date, weightKg}` |
-| `nutrikala:mealLog` | Objek `{ "YYYY-MM-DD": [entry, ...] }` |
-| `nutrikala:favFoods` | Array id makanan |
-| `nutrikala:recentFoods` | Array id makanan (maks 10) |
-| `nutrikala:workoutLog` | Objek `{ "YYYY-MM-DD": [entry, ...] }` |
-| `nutrikala:settings` | Tema, satuan, pengingat |
-| `nutrikala:schemaVersion` | Angka versi skema untuk migrasi |
+| Kunci                     | Isi                                    |
+| ------------------------- | -------------------------------------- |
+| `nutrikala:profile`       | Objek profil pengguna                  |
+| `nutrikala:weightLog`     | Array `{date, weightKg}`               |
+| `nutrikala:mealLog`       | Objek `{ "YYYY-MM-DD": [entry, ...] }` |
+| `nutrikala:favFoods`      | Array id makanan                       |
+| `nutrikala:recentFoods`   | Array id makanan (maks 10)             |
+| `nutrikala:workoutLog`    | Objek `{ "YYYY-MM-DD": [entry, ...] }` |
+| `nutrikala:settings`      | Tema, satuan, pengingat                |
+| `nutrikala:schemaVersion` | Angka versi skema untuk migrasi        |
 
 ### 2.4 Skema data
 
@@ -168,6 +171,7 @@ Tujuan: fondasi rapi sebelum fitur baru.
 Alasan: data profil dipakai semua fitur lain.
 
 **Tugas:**
+
 - [x] **1.1** Buat `profile.js` dan render di tab Akun.
 - [x] **1.2** **Form profil:** nama, tahun lahir/usia, jenis kelamin, tinggi, berat, tingkat aktivitas, tujuan, berat target. Validasi rentang masuk akal (tinggi 100–250 cm, berat 20–300 kg, usia 10–100).
 - [x] **1.3** **Kartu ringkasan** di atas halaman: BMI, kategori, BMR, TDEE, dan target kalori harian (hitung via `nutrition.js`).
@@ -180,6 +184,7 @@ Alasan: data profil dipakai semua fitur lain.
 - [x] **1.10** State kosong: jika profil belum diisi, tampilkan ajakan ramah untuk melengkapinya.
 
 **Kriteria selesai:**
+
 - Profil tersimpan dan tetap ada setelah reload/offline.
 - Mengubah profil memperbarui target kalori secara langsung.
 - Ekspor menghasilkan file JSON yang bisa diimpor kembali tanpa kehilangan data.
@@ -191,6 +196,7 @@ Alasan: data profil dipakai semua fitur lain.
 Fokus: **pencatat asupan harian** terhadap target kalori, bukan sekadar jadwal.
 
 **Tugas:**
+
 - [ ] **2.1** Isi `FOODS` di `data.js`: **minimal 60 makanan Indonesia** umum dengan kalori dan makro per porsi. Contoh: nasi putih, nasi merah, lontong, bubur ayam, tempe goreng, tahu goreng, ayam goreng, ayam bakar, ikan bakar, telur dadar, telur rebus, soto ayam, gado-gado, pecel, sayur asem, sayur bayam, capcay, rendang, nasi goreng, mie goreng, bakso, pisang, pepaya, jeruk, semangka, teh manis, kopi susu, susu, dan sejenisnya. Gunakan nilai yang masuk akal dan tandai sebagai **perkiraan** di UI.
 - [ ] **2.2** Buat `meals.js` dan render di tab Pola Makan.
 - [ ] **2.3** **Ringkasan harian** di atas: progress ring kalori (terkonsumsi vs target dari profil), plus tiga bar makro (protein, karbo, lemak).
@@ -201,13 +207,14 @@ Fokus: **pencatat asupan harian** terhadap target kalori, bukan sekadar jadwal.
 - [ ] **2.8** **Favorit:** tombol bintang pada makanan, tersimpan di `favFoods`.
 - [ ] **2.9** **Makanan kustom:** pengguna dapat menambah makanan sendiri (nama, kkal, makro opsional) dan disimpan terpisah.
 - [ ] **2.10** Tanpa profil: tampilkan ajakan "Lengkapi profil untuk melihat targetmu" dengan tautan ke tab Akun, tetapi pencatatan tetap bisa dipakai dengan target bawaan 2000 kkal.
-- [ ] **2.11** *(Lanjutan)* **Jadwal mingguan:** saran menu 7 hari berdasarkan target kalori, dibuat dari `FOODS`.
-- [ ] **2.12** *(Lanjutan)* **Daftar belanja** otomatis dari jadwal mingguan, dengan checklist yang tersimpan.
-- [ ] **2.13** *(Lanjutan)* **Resep sederhana:** bahan terjangkau, langkah, kalori per porsi.
+- [ ] **2.11** _(Lanjutan)_ **Jadwal mingguan:** saran menu 7 hari berdasarkan target kalori, dibuat dari `FOODS`.
+- [ ] **2.12** _(Lanjutan)_ **Daftar belanja** otomatis dari jadwal mingguan, dengan checklist yang tersimpan.
+- [ ] **2.13** _(Lanjutan)_ **Resep sederhana:** bahan terjangkau, langkah, kalori per porsi.
 
 Tugas 2.1–2.10 adalah inti. Tugas 2.11–2.13 hanya dikerjakan setelah inti stabil.
 
 **Kriteria selesai:**
+
 - Menambah/mengubah/menghapus makanan memperbarui total kalori dan makro seketika.
 - Data per tanggal terpisah dengan benar dan bertahan setelah reload.
 - Pencarian responsif untuk 60+ item tanpa jeda terasa.
@@ -217,6 +224,7 @@ Tugas 2.1–2.10 adalah inti. Tugas 2.11–2.13 hanya dikerjakan setelah inti st
 ### FASE 3 — Halaman Olahraga · PRIORITAS 3
 
 **Tugas:**
+
 - [ ] **3.1** Isi `EXERCISES` di `data.js`: **minimal 25 latihan**, dengan nilai MET yang wajar. Campuran kardio (jalan, jogging, bersepeda, lompat tali, senam), kekuatan (push-up, squat, plank, sit-up, lunges), dan peregangan/yoga. Sertakan langkah singkat 3–5 poin per latihan.
 - [ ] **3.2** Buat `workout.js` dan render di tab Olahraga.
 - [ ] **3.3** **Ringkasan mingguan:** progress bar menit aktif minggu ini terhadap target 150 menit, total kalori terbakar, dan **streak** hari aktif beruntun.
@@ -227,9 +235,10 @@ Tugas 2.1–2.10 adalah inti. Tugas 2.11–2.13 hanya dikerjakan setelah inti st
 - [ ] **3.8** **Timer latihan:** interval kerja/istirahat yang dapat diatur, dengan getar (`navigator.vibrate`) dan/atau bunyi singkat pada pergantian. Timer harus tetap akurat meski layar mati sebentar (hitung dari timestamp, bukan dari hitungan `setInterval`).
 - [ ] **3.9** **Riwayat:** daftar aktivitas per hari, dengan hapus entri.
 - [ ] **3.10** Tambahkan peringatan kesehatan singkat: "Hentikan latihan jika terasa nyeri dada, pusing, atau sesak. Konsultasikan dengan dokter bila punya kondisi medis."
-- [ ] **3.11** *(Lanjutan)* Hubungkan kalori olahraga ke halaman Pola Makan sebagai informasi "kalori terbakar hari ini" (tampilkan saja, **jangan** otomatis menambah jatah makan).
+- [ ] **3.11** _(Lanjutan)_ Hubungkan kalori olahraga ke halaman Pola Makan sebagai informasi "kalori terbakar hari ini" (tampilkan saja, **jangan** otomatis menambah jatah makan).
 
 **Kriteria selesai:**
+
 - Kalori terbakar sesuai rumus untuk beberapa kasus uji manual.
 - Streak dan menit mingguan benar di batas pergantian hari dan minggu (minggu dimulai Senin).
 - Timer berjalan benar saat tab dipindah lalu dikembalikan.
