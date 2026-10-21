@@ -473,27 +473,256 @@
       </main>
 
       <!-- ============ TAB PLACEHOLDER LAIN ============ -->
-      <main
-        class="halaman halaman--placeholder"
-        id="page-pola-makan"
-        data-page="pola-makan"
-        hidden
-      >
-        <div class="placeholder">
-          <span class="placeholder__ikon" aria-hidden="true">🍽️</span>
-          <h2 class="placeholder__judul">Pola Makan</h2>
-          <p class="placeholder__teks">
-            Jadwal makan mingguan, daftar belanja, dan resep rumahan sedang kami
-            siapkan hangat-hangat untukmu.
-          </p>
-          <span class="placeholder__chip">Segera hadir</span>
+      <main class="halaman" id="page-pola-makan" data-page="pola-makan" hidden>
+        <!-- Ringkasan harian -->
+        <section class="kartu" aria-labelledby="mealRingkasanJudul">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="mealRingkasanJudul">
+              Ringkasan Hari Ini
+            </h2>
+            <span class="lencana" id="mealTanggalLabel"></span>
+          </div>
+
+          <div class="meal__ringBaris">
+            <div class="meal__ring" id="mealRing"></div>
+            <div class="meal__ringInfo">
+              <p class="meal__sisaTeks" id="mealSisaTeks" aria-live="polite"></p>
+              <button
+                class="meal__tautan"
+                type="button"
+                id="mealKeAkun"
+                data-tab="akun"
+                hidden
+              >
+                Lengkapi profil untuk target yang lebih pas →
+              </button>
+            </div>
+          </div>
+
+          <div class="meal__makro" id="mealMakro"></div>
+
+          <p class="catatan">Nilai gizi bersifat perkiraan.</p>
+        </section>
+
+        <!-- Navigasi tanggal -->
+        <div class="meal__nav" role="group" aria-label="Navigasi tanggal">
           <button
-            class="tombol tombol--garis"
+            class="meal__navTombol"
+            id="btnHariSebelum"
             type="button"
-            data-tab="kalkulator"
+            aria-label="Hari sebelumnya"
           >
-            ← Kembali ke Kalkulator
+            ←
           </button>
+          <button
+            class="meal__navTombol meal__navTombol--hari"
+            id="btnHariIni"
+            type="button"
+            hidden
+          >
+            Hari ini
+          </button>
+          <button
+            class="meal__navTombol"
+            id="btnHariBerikut"
+            type="button"
+            aria-label="Hari berikutnya"
+          >
+            →
+          </button>
+        </div>
+
+        <!-- Empat slot makan -->
+        <section class="kartu meal__slot" aria-labelledby="mealJudulSarapan">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="mealJudulSarapan">Sarapan</h2>
+            <span class="lencana" id="mealTotal-breakfast">0 kkal</span>
+          </div>
+          <ul class="meal__daftar" id="mealDaftar-breakfast"></ul>
+          <button
+            class="tombol tombol--garis meal__tambah"
+            type="button"
+            data-slot-tambah="breakfast"
+          >
+            + Tambah makanan
+          </button>
+        </section>
+
+        <section class="kartu meal__slot" aria-labelledby="mealJudulSiang">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="mealJudulSiang">Makan Siang</h2>
+            <span class="lencana" id="mealTotal-lunch">0 kkal</span>
+          </div>
+          <ul class="meal__daftar" id="mealDaftar-lunch"></ul>
+          <button
+            class="tombol tombol--garis meal__tambah"
+            type="button"
+            data-slot-tambah="lunch"
+          >
+            + Tambah makanan
+          </button>
+        </section>
+
+        <section class="kartu meal__slot" aria-labelledby="mealJudulMalam">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="mealJudulMalam">Makan Malam</h2>
+            <span class="lencana" id="mealTotal-dinner">0 kkal</span>
+          </div>
+          <ul class="meal__daftar" id="mealDaftar-dinner"></ul>
+          <button
+            class="tombol tombol--garis meal__tambah"
+            type="button"
+            data-slot-tambah="dinner"
+          >
+            + Tambah makanan
+          </button>
+        </section>
+
+        <section class="kartu meal__slot" aria-labelledby="mealJudulCamilan">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="mealJudulCamilan">Camilan</h2>
+            <span class="lencana" id="mealTotal-snack">0 kkal</span>
+          </div>
+          <ul class="meal__daftar" id="mealDaftar-snack"></ul>
+          <button
+            class="tombol tombol--garis meal__tambah"
+            type="button"
+            data-slot-tambah="snack"
+          >
+            + Tambah makanan
+          </button>
+        </section>
+
+        <!-- Dialog tambah makanan -->
+        <div class="meal__dialog" id="mealDialog" hidden>
+          <div
+            class="meal__dialogKotak"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mealDialogJudul"
+          >
+            <div class="kartu__kepala">
+              <h2 class="kartu__judul" id="mealDialogJudul">Tambah Makanan</h2>
+              <button
+                class="meal__dialogTutup"
+                id="btnTutupDialog"
+                type="button"
+                aria-label="Tutup dialog"
+              >
+                ×
+              </button>
+            </div>
+
+            <label class="profile__label" for="mealCari">Cari makanan</label>
+            <input
+              class="meal__cari"
+              id="mealCari"
+              type="search"
+              placeholder="Cari makanan, mis. nasi"
+              autocomplete="off"
+            />
+
+            <div class="meal__bagian" id="mealTerakhir"></div>
+            <div class="meal__bagian" id="mealFavorit"></div>
+            <div class="meal__hasil" id="mealHasil" aria-live="polite"></div>
+
+            <div class="meal__porsi">
+              <span class="meal__porsiMakanan" id="mealPorsiMakanan"
+                >Pilih makanan dulu</span
+              >
+              <div class="meal__porsiKendali" role="group" aria-label="Jumlah porsi">
+                <button
+                  class="meal__porsiTombol"
+                  id="btnPorsiKurang"
+                  type="button"
+                  aria-label="Kurangi porsi"
+                >
+                  −
+                </button>
+                <span class="meal__porsiNilai" id="mealPorsiNilai">1</span>
+                <button
+                  class="meal__porsiTombol"
+                  id="btnPorsiTambah"
+                  type="button"
+                  aria-label="Tambah porsi"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <button class="tombol tombol--utama" id="btnSimpanEntri" type="button" disabled>
+              Simpan
+            </button>
+
+            <button class="tombol tombol--garis" id="btnBukaCustom" type="button">
+              ✍️ Tambah makanan sendiri
+            </button>
+
+            <form class="meal__customForm" id="mealCustomForm" hidden>
+              <div class="meal__customGrid">
+                <div class="profile__field profile__field--penuh">
+                  <label class="profile__label" for="mealCustomNama">Nama makanan</label>
+                  <input
+                    class="profile__input"
+                    type="text"
+                    id="mealCustomNama"
+                    maxlength="40"
+                    placeholder="Mis. Roti bakar keju"
+                  />
+                </div>
+                <div class="profile__field">
+                  <label class="profile__label" for="mealCustomKkal">Kalori (kkal)</label>
+                  <input
+                    class="profile__input"
+                    type="number"
+                    id="mealCustomKkal"
+                    min="1"
+                    max="5000"
+                    step="1"
+                    inputmode="numeric"
+                  />
+                </div>
+                <div class="profile__field">
+                  <label class="profile__label" for="mealCustomProtein">Protein (g, opsional)</label>
+                  <input
+                    class="profile__input"
+                    type="number"
+                    id="mealCustomProtein"
+                    min="0"
+                    max="400"
+                    step="0.5"
+                    inputmode="decimal"
+                  />
+                </div>
+                <div class="profile__field">
+                  <label class="profile__label" for="mealCustomCarbs">Karbo (g, opsional)</label>
+                  <input
+                    class="profile__input"
+                    type="number"
+                    id="mealCustomCarbs"
+                    min="0"
+                    max="400"
+                    step="0.5"
+                    inputmode="decimal"
+                  />
+                </div>
+                <div class="profile__field">
+                  <label class="profile__label" for="mealCustomFat">Lemak (g, opsional)</label>
+                  <input
+                    class="profile__input"
+                    type="number"
+                    id="mealCustomFat"
+                    min="0"
+                    max="300"
+                    step="0.5"
+                    inputmode="decimal"
+                  />
+                </div>
+              </div>
+              <button class="tombol tombol--utama" type="submit">Simpan makanan milikmu</button>
+            </form>
+          </div>
         </div>
       </main>
 

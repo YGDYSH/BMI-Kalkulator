@@ -1077,6 +1077,27 @@ button {
   transform: translateX(-50%) translateY(0);
 }
 
+/* Tombol aksi dalam toast (mis. "Urungkan") */
+.toast__teks {
+  display: block;
+}
+
+.toast__tombol {
+  margin-top: 6px;
+  padding: 5px 14px;
+  border: 1.5px solid currentColor;
+  border-radius: var(--r-bulat);
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.toast__tombol:active {
+  transform: scale(0.97);
+}
+
 /* --------------------------------------------------------------------------
    17. Responsif & Aksesibilitas
    -------------------------------------------------------------------------- */
@@ -1405,4 +1426,457 @@ button {
   :root[data-tema="gelap"] .aplikasi {
     box-shadow: 0 0 0 1px var(--c-garis), 0 20px 50px rgba(0, 0, 0, 0.5);
   }
+}
+
+/* ==========================================================================
+   20. Halaman Pola Makan (meal-*)
+   ========================================================================== */
+
+/* --- Ring & bar makro ------------------------------------------------------ */
+
+.meal__ringBaris {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+
+.meal__ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 116px;
+  height: 116px;
+  flex: 0 0 auto;
+  color: var(--c-utama);
+}
+
+.meal__ringSvg {
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+}
+
+.meal__ringBelakang {
+  stroke: var(--c-peach);
+}
+
+.meal__ringIsi {
+  stroke: currentColor;
+  transition: stroke-dashoffset 0.5s var(--ease-hangat);
+}
+
+.meal__ringAngka {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  font-size: 1.12rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--c-teks);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.meal__ringSatuan {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--c-teks-mati);
+  text-align: center;
+  line-height: 1.3;
+  max-width: 84px;
+}
+
+.meal__ringInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+
+.meal__sisaTeks {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--c-teks);
+}
+
+.meal__tautan {
+  align-self: flex-start;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: var(--c-utama-tua);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.meal__makro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.meal__makroBaris {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meal__makroAtas {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+
+.meal__makroNama {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--c-teks);
+}
+
+.meal__makroNilai {
+  font-size: 0.75rem;
+  color: var(--c-teks-mati);
+  font-variant-numeric: tabular-nums;
+}
+
+.meal__makroBar {
+  height: 9px;
+  border-radius: var(--r-bulat);
+  background: var(--c-peach);
+  overflow: hidden;
+}
+
+.meal__makroIsi {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-bulat);
+  transition: width 0.4s var(--ease-hangat);
+}
+
+/* --- Navigasi tanggal ------------------------------------------------------ */
+
+.meal__nav {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.meal__navTombol {
+  min-width: 48px;
+  min-height: 44px;
+  border: 1.5px solid var(--c-garis);
+  border-radius: var(--r-bulat);
+  background: var(--c-kartu);
+  color: var(--c-teks);
+  font-size: 1rem;
+  font-weight: 800;
+  transition: border-color 0.2s var(--ease-hangat), background 0.2s var(--ease-hangat);
+}
+
+.meal__navTombol:hover {
+  border-color: var(--c-aprikot-tua);
+}
+
+.meal__navTombol:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.meal__navTombol--hari {
+  flex: 1;
+  border-color: var(--c-aprikot);
+  background: var(--c-utama-muda);
+  color: var(--c-utama-tua);
+  font-size: 0.85rem;
+}
+
+/* --- Slot & baris entri ---------------------------------------------------- */
+
+.meal__daftar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.meal__baris {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--r-sedang);
+  background: var(--c-latar-2);
+}
+
+.meal__barisTeks {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.meal__barisNama {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.meal__barisKet {
+  font-size: 0.74rem;
+  color: var(--c-teks-redup);
+  font-variant-numeric: tabular-nums;
+}
+
+.meal__barisAksi {
+  display: flex;
+  gap: 2px;
+}
+
+.meal__aksi {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--r-kecil);
+  background: transparent;
+  color: var(--c-teks-redup);
+  font-size: 1.02rem;
+}
+
+.meal__aksi:hover {
+  background: var(--c-peach);
+}
+
+.meal__bintang--aktif {
+  color: var(--c-madu);
+}
+
+.meal__aksi--hapus:hover {
+  color: #b91c1c;
+}
+
+/* --- Dialog (bottom sheet) ------------------------------------------------- */
+
+.meal__dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: var(--sp-4);
+  padding-top: var(--sp-7);
+  background: rgba(63, 45, 33, 0.45);
+}
+
+.meal__dialog[hidden] {
+  display: none;
+}
+
+.meal__dialogKotak {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  width: 100%;
+  max-width: 430px;
+  max-height: min(86dvh, 680px);
+  overflow-y: auto;
+  padding: var(--sp-5) var(--sp-4) calc(var(--sp-5) + env(safe-area-inset-bottom));
+  border-radius: var(--r-besar) var(--r-besar) 0 0;
+  background: var(--c-latar);
+  box-shadow: 0 -12px 40px rgba(63, 45, 33, 0.35);
+}
+
+.meal__dialogTutup {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border: none;
+  border-radius: var(--r-bulat);
+  background: var(--c-latar-2);
+  color: var(--c-teks);
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.meal__cari {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--c-garis);
+  border-radius: var(--r-bulat);
+  background: var(--c-kartu-lembut);
+  color: var(--c-teks);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.meal__bagianJudul {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--c-teks-redup);
+}
+
+.meal__chipWadah {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+.meal__chipMakanan {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1.5px solid var(--c-aprikot);
+  border-radius: var(--r-bulat);
+  background: var(--c-utama-muda);
+  color: var(--c-utama-tua);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.meal__hasil {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-height: 110px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.meal__hasilBaris {
+  display: flex;
+  align-items: stretch;
+  gap: var(--sp-2);
+}
+
+.meal__hasilUtama {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 56px;
+  padding: var(--sp-2) var(--sp-3);
+  justify-content: center;
+  border: 1.5px solid var(--c-garis);
+  border-radius: var(--r-sedang);
+  background: var(--c-kartu-lembut);
+  color: var(--c-teks);
+  text-align: left;
+}
+
+.meal__hasilBaris--terpilih .meal__hasilUtama {
+  border-color: var(--c-utama);
+  background: var(--c-utama-muda);
+}
+
+.meal__hasilNama {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.meal__hasilKet {
+  font-size: 0.74rem;
+  color: var(--c-teks-redup);
+  font-variant-numeric: tabular-nums;
+}
+
+.meal__hasilKosong {
+  padding: var(--sp-4) 0;
+  color: var(--c-teks-mati);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.meal__bintang {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  min-height: 56px;
+  flex: 0 0 auto;
+  border: 1.5px solid var(--c-garis);
+  border-radius: var(--r-sedang);
+  background: var(--c-kartu-lembut);
+  color: var(--c-teks-redup);
+  font-size: 1.1rem;
+}
+
+.meal__bintang--aktif {
+  color: var(--c-madu);
+  border-color: var(--c-aprikot-tua);
+}
+
+/* --- Porsi ------------------------------------------------------------------ */
+
+.meal__porsi {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  border-radius: var(--r-sedang);
+  background: var(--c-latar-2);
+}
+
+.meal__porsiMakanan {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--c-teks-redup);
+  line-height: 1.4;
+}
+
+.meal__porsiKendali {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.meal__porsiTombol {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--c-garis);
+  border-radius: var(--r-bulat);
+  background: var(--c-kartu);
+  color: var(--c-teks);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.meal__porsiNilai {
+  min-width: 42px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--c-teks);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Form makanan kustom ---------------------------------------------------- */
+
+.meal__customForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--c-garis);
+}
+
+.meal__customForm[hidden] {
+  display: none;
+}
+
+.meal__customGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
 }
