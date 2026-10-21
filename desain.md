@@ -197,16 +197,16 @@ Fokus: **pencatat asupan harian** terhadap target kalori, bukan sekadar jadwal.
 
 **Tugas:**
 
-- [ ] **2.1** Isi `FOODS` di `data.js`: **minimal 60 makanan Indonesia** umum dengan kalori dan makro per porsi. Contoh: nasi putih, nasi merah, lontong, bubur ayam, tempe goreng, tahu goreng, ayam goreng, ayam bakar, ikan bakar, telur dadar, telur rebus, soto ayam, gado-gado, pecel, sayur asem, sayur bayam, capcay, rendang, nasi goreng, mie goreng, bakso, pisang, pepaya, jeruk, semangka, teh manis, kopi susu, susu, dan sejenisnya. Gunakan nilai yang masuk akal dan tandai sebagai **perkiraan** di UI.
-- [ ] **2.2** Buat `meals.js` dan render di tab Pola Makan.
-- [ ] **2.3** **Ringkasan harian** di atas: progress ring kalori (terkonsumsi vs target dari profil), plus tiga bar makro (protein, karbo, lemak).
-- [ ] **2.4** **Navigasi tanggal:** tombol hari sebelumnya/berikutnya dan "Hari ini".
-- [ ] **2.5** **Empat slot makan** (Sarapan, Makan siang, Makan malam, Camilan), masing-masing menampilkan daftar entri, subtotal kkal, dan tombol "+ Tambah".
-- [ ] **2.6** **Dialog tambah makanan:** kolom pencarian (tanpa peduli huruf besar/kecil), daftar hasil, pilih jumlah porsi (kelipatan 0.5), lalu simpan. Tampilkan "Terakhir dipakai" dan "Favorit" di bagian atas dialog.
-- [ ] **2.7** **Edit dan hapus entri** (geser atau tombol), dengan opsi urungkan lewat toast.
-- [ ] **2.8** **Favorit:** tombol bintang pada makanan, tersimpan di `favFoods`.
-- [ ] **2.9** **Makanan kustom:** pengguna dapat menambah makanan sendiri (nama, kkal, makro opsional) dan disimpan terpisah.
-- [ ] **2.10** Tanpa profil: tampilkan ajakan "Lengkapi profil untuk melihat targetmu" dengan tautan ke tab Akun, tetapi pencatatan tetap bisa dipakai dengan target bawaan 2000 kkal.
+- [x] **2.1** Isi `FOODS` di `data.js`: **minimal 60 makanan Indonesia** umum dengan kalori dan makro per porsi. Contoh: nasi putih, nasi merah, lontong, bubur ayam, tempe goreng, tahu goreng, ayam goreng, ayam bakar, ikan bakar, telur dadar, telur rebus, soto ayam, gado-gado, pecel, sayur asem, sayur bayam, capcay, rendang, nasi goreng, mie goreng, bakso, pisang, pepaya, jeruk, semangka, teh manis, kopi susu, susu, dan sejenisnya. Gunakan nilai yang masuk akal dan tandai sebagai **perkiraan** di UI.
+- [x] **2.2** Buat `meals.js` dan render di tab Pola Makan.
+- [x] **2.3** **Ringkasan harian** di atas: progress ring kalori (terkonsumsi vs target dari profil), plus tiga bar makro (protein, karbo, lemak).
+- [x] **2.4** **Navigasi tanggal:** tombol hari sebelumnya/berikutnya dan "Hari ini".
+- [x] **2.5** **Empat slot makan** (Sarapan, Makan siang, Makan malam, Camilan), masing-masing menampilkan daftar entri, subtotal kkal, dan tombol "+ Tambah".
+- [x] **2.6** **Dialog tambah makanan:** kolom pencarian (tanpa peduli huruf besar/kecil), daftar hasil, pilih jumlah porsi (kelipatan 0.5), lalu simpan. Tampilkan "Terakhir dipakai" dan "Favorit" di bagian atas dialog.
+- [x] **2.7** **Edit dan hapus entri** (geser atau tombol), dengan opsi urungkan lewat toast.
+- [x] **2.8** **Favorit:** tombol bintang pada makanan, tersimpan di `favFoods`.
+- [x] **2.9** **Makanan kustom:** pengguna dapat menambah makanan sendiri (nama, kkal, makro opsional) dan disimpan terpisah.
+- [x] **2.10** Tanpa profil: tampilkan ajakan "Lengkapi profil untuk melihat targetmu" dengan tautan ke tab Akun, tetapi pencatatan tetap bisa dipakai dengan target bawaan 2000 kkal.
 - [ ] **2.11** _(Lanjutan)_ **Jadwal mingguan:** saran menu 7 hari berdasarkan target kalori, dibuat dari `FOODS`.
 - [ ] **2.12** _(Lanjutan)_ **Daftar belanja** otomatis dari jadwal mingguan, dengan checklist yang tersimpan.
 - [ ] **2.13** _(Lanjutan)_ **Resep sederhana:** bahan terjangkau, langkah, kalori per porsi.
@@ -321,3 +321,15 @@ Sebelum menandai fase selesai:
   - Pra-isi kalkulator (1.4) men-tack lag clamp ke rentang slider (usia ≤90, berat bulat, tinggi 120–220) — slider tak mendukung desimal; profil menyimpan nilai aslinya.
   - Uji node: roundtrip simpan/ekspor/impor/hapus profile + weightLog semua `OK`; sintaks semua modul `node --check` `OK`.
   - Perlu verifikasi manual di `http://localhost/Bmi-Calc/`: tab Akun, tema gelap, ekspor-impor, grafik, dan BMI/hidrasi lama tetap jalan.
+
+- **21 Okt 2026 — Fase 2 (inti 2.1–2.10).**
+  - **2.2:** mengikuti pola `profile.js` — markup halaman Pola Makan statis di `index.html`, `meals.js` mengekspor `renderMealsPage(container)` dan memasang event lewat delegasi pada wadah (satu listener `click`, `submit`, `input` per halaman).
+  - **2.1:** `FOODS` berisi 64 makanan Indonesia urut abjad dengan nilai per porsi; catatan "Nilai gizi bersifat perkiraan." tampil di bawah halaman (sudah di HTML). `SLOT_MAKAN` kunci `breakfast|lunch|dinner|snack` sesuai skema 2.4.
+  - **2.3:** ring SVG dibuat dengan `createElementNS` (tanpa innerHTML); bar makro menampilkan "terisi vs target gram" dari profil; `stroke-dashoffset` ring tidak negatif/lewat 2 lingkaran.
+  - **2.6:** pencarian `includes` lowercase (linear terhadap 64 item — cukup cepat); porsi kelipatan 0,5; tombol bintang langsung di baris hasil.
+  - **2.7:** hapus pakai tombol ikon (bukan geser) agar sederhana + aksesibel; undo via `toastAksi` (ui.js) dengan window setTimeout 5 s; edit memakai kembali dialog yang sama (pilih entri → tulis ulang porsi).
+  - **2.9:** makanan kustom diberi id `kustom-<ts>-<rand>` dan idx `isKustom:true`; ditampilkan di hasil pencarian dengan tag "Kustom"; batas 50 item (FIFO).
+  - **2.10:** tanpa profil → target 2000 kkal + rasio default + ajakan button `#mealKeAkun` (`data-tab="akun"`, ditangani `pasangNavigasi` yang sudah ada).
+  - `sw.js`: `meals.js` masuk app shell, cache naik ke `nutrikala-shell-v4`.
+  - Uji node: 64 makanan urut abjad/id unik/lengkap `OK`; log per tanggal, favorit, terbaru (dedupe + maks 10), makanan kustom + validasi `OK`; sintaks semua modul `node --check` `OK`.
+  - Perlu verifikasi manual di `http://localhost/Bmi-Calc/`: tab Pola Makan (ring, slot, dialog, porsi, kustom, undo), memastikan BMI/hidrasi Akun lama tetap jalan.
