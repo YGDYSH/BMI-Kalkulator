@@ -15,6 +15,10 @@ const KEY = {
   profil: 'nutrikala:profile',
   berat: 'nutrikala:weightLog',
   pengaturan: 'nutrikala:settings',
+  logMakan: 'nutrikala:mealLog',
+  favorit: 'nutrikala:favFoods',
+  terbaru: 'nutrikala:recentFoods',
+  kustom: 'nutrikala:foodKustom',
 };
 
 /** Prefiks semua kunci milik NutriKala (untuk ekspor/hapus total). */
@@ -448,4 +452,126 @@ export function hapusSemuaData() {
     console.warn('[NutriKala] Gagal menghapus data:', err);
     return false;
   }
+}
+
+/* --------------------------------------------------------------------------
+   Log makan per tanggal (nutrikala:mealLog) — { "YYYY-MM-DD": [entri...] }
+   -------------------------------------------------------------------------- */
+
+function muatObjekAntarTanggal(kunci) {
+  const data = amanAmbil(kunci);
+  return data && typeof data === 'object' ? data : {};
+}
+
+export function muatLogMakan(tanggal) {
+  const data = muatObjekAntarTanggal(KEY.logMakan);
+  const entri = data[tanggal];
+  if (!Array.isArray(entri)) return [];
+  return entri.filter((item) =>
+    item && typeof item.id === 'string' && typeof item.foodId === 'string' &&
+    Number.isFinite(Number(item.servings)));
+}
+
+export function simpanLogMakan(tanggal, entri) {
+  const data = muatObjekAntarTanggal(KEY.logMakan);
+  if (entri.length === 0) {
+    delete data[tanggal];
+  } else {
+    data[tanggal] = entri;
+  }
+  return amanSimpan(KEY.logMakan, data);
+}
+
+/* --------------------------------------------------------------------------
+   Makanan favorit (nutrikala:favFoods) — array id makanan
+   -------------------------------------------------------------------------- */
+
+export function muatFavorit() {
+  const data = amanAmbil(KEY.favorit);
+  if (!Array.isArray(data)) return [];
+  return data.filter((id) => typeof id === 'string').slice(-60);
+}
+
+/** Tambah/hapus id dari favorit. Kembalikan favorit terbaru + status. */
+export function ubahFavorit(id, aktif) {
+  if (typeof id !== 'string') return muatFavorit();
+  const daftar = muatFavorit();
+  const indeks = daftar.indexOf(id);
+  if (aktif && indeks === -1) daftar.push(id);
+  if (!aktif && indeks !== -1) daftar.splice(indeks, 1);
+  amanSimpan(KEY.favorit, daftar);
+  return daftar;
+}
+
+/* --------------------------------------------------------------------------
+   Makanan terakhir dipakai (nutrikala:recentFoods) — array id, maks 10
+   -------------------------------------------------------------------------- */
+
+export const MAKS_TERBARU = 10;
+
+export function muatMakananTerbaru() {
+  const data = amanAmbil(KEY.terbaru);
+  if (!Array.isArray(data)) return [];
+  return data.filter((id) => typeof id === 'string').slice(0, MAKS_TERBARU);
+}
+
+/** Catat id makanan yang baru dipakai (paling depan, tanpa duplikat). */
+export function catatMakananDipakai(id) {
+  if (typeof id !== 'string') return muatMakananTerbaru();
+  const daftar = muatMakananTerbaru().filter((item) => item !== id);
+  daftar.unshift(id);
+  const terpotong = daftar.slice(0, MAKS_TERBARU);
+  amanSimpan(KEY.terbaru, terpotong);
+  return terpotong;
+}
+
+/* --------------------------------------------------------------------------
+   Makanan kustom (nutrikala:foodKustom) — array objek makanan
+   -------------------------------------------------------------------------- */
+
+export const MAKS_KUSTOM = 50;
+
+/** Validasi bentuk makanan kustom; kembalikan objek bersih atau null. */
+export function bersihkanMakananKustom(makanan) {
+  if (!makanan || typeof makanan !== 'object') return null;
+  const nama = typeof makanan.name === 'string'
+    ? makanan.name.trim().slice(0, 40) : '';
+  const kcal = Number(makanan.kcal);
+  if (!nama || !Number.isFinite(kcal) || kcal <= 0 || kcal > 5000) return null;
+  const makro = (nilai, maks) => {
+    const angka = Number(nilai);
+    return Number.isFinite(angka) && angka >= 0 && angka <= maks
+      ? Math.round(angka * 10) / 10 : 0;
+  };
+  return {
+    id: typeof makanan.id === 'string' ? makanan.id : '',
+    name: nama,
+    portion: typeof makanan.portion === 'string' ? makanan.portion.slice(0, 30) : '',
+    kcal: Math.round(kcal),
+    protein: makro(makanan.protein, 400),
+    carbs: makro(makanan.carbs, 400),
+    fat: makro(makanan.fat, 300),
+    kustom: true,
+    tags: ['camilan'],
+  };
+}
+
+export function muatMakananKustom() {
+  const data = amanAmbil(KEY.kustom);
+  if (!Array.isArray(data)) return [];
+  return data
+    .map(bersihkanMakananKustom)
+    .filter(Boolean);
+}
+
+/** Tambah makanan kustom; id dibuat di sini bila belum ada. */
+export function tambahMakananKustom(makanan) {
+  const bersih = bersihkanMakananKustom(makanan);
+  if (!bersih) return null;
+  if (!bersih.id) {
+    bersih.id = `kustom-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  }
+  const daftar = muatMakananKustom();
+  daftar.push(bersih);
+  return amanSimpan(KEY.kustom, daftar.slice(-MAKS_KUSTOM)) ? bersih : null;
 }
