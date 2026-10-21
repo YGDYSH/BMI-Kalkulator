@@ -23,7 +23,7 @@
 
   --c-teks: #3f2d21;             /* teks utama, kontras aman di atas krem */
   --c-teks-redup: #7c6551;       /* teks sekunder */
-  --c-teks-mati: #a08e7c;        /* teks tersier / catatan */
+  --c-teks-mati: #75614d;        /* teks tersier (digelapkan agar kontras AA di krem) */
   --c-garis: #f5e4d3;            /* garis pemisah lembut */
   --c-fokus: #ea580c;
 
@@ -213,6 +213,11 @@ button {
   border-radius: var(--r-bulat);
   background: var(--c-utama);
   border: 2px solid var(--c-kartu);
+}
+
+/* Titik disembunyikan sampai fitur pengingat hadir (Fase 4) */
+.header__titik[hidden] {
+  display: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -1016,7 +1021,7 @@ button {
   border-radius: var(--r-kecil);
   background: transparent;
   color: var(--c-teks-mati);
-  font-size: 0.68rem;
+  font-size: 0.75rem; /* minimal 12px agar mudah dibaca */
   font-weight: 700;
   transition: color 0.2s var(--ease-hangat), background 0.2s var(--ease-hangat);
 }
