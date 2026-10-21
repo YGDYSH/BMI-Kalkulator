@@ -41,6 +41,7 @@ import {
 } from './hydration.js';
 
 import { renderProfilePage } from './profile.js';
+import { renderMealsPage } from './meals.js';
 
 import {
   ambil,
@@ -432,6 +433,9 @@ function mulai() {
   renderProfilePage(ambil('page-akun'), {
     onProfilTersimpan: saatProfilTersimpan,
   });
+
+  // Halaman Pola Makan (Fase 2): siapkan sekali di awal.
+  renderMealsPage(ambil('page-pola-makan'));
 
   daftarkanServiceWorker();
   console.info('[NutriKala] Kalkulator BMI siap.');
