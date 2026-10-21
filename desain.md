@@ -168,16 +168,16 @@ Tujuan: fondasi rapi sebelum fitur baru.
 Alasan: data profil dipakai semua fitur lain.
 
 **Tugas:**
-- [ ] **1.1** Buat `profile.js` dan render di tab Akun.
-- [ ] **1.2** **Form profil:** nama, tahun lahir/usia, jenis kelamin, tinggi, berat, tingkat aktivitas, tujuan, berat target. Validasi rentang masuk akal (tinggi 100–250 cm, berat 20–300 kg, usia 10–100).
-- [ ] **1.3** **Kartu ringkasan** di atas halaman: BMI, kategori, BMR, TDEE, dan target kalori harian (hitung via `nutrition.js`).
-- [ ] **1.4** **Pra-isi kalkulator BMI** dari profil agar pengguna tidak mengisi ulang. Pertahankan kalkulator tetap bisa dipakai tanpa profil.
-- [ ] **1.5** **Riwayat berat badan:** tombol "Catat berat hari ini" menyimpan ke `weightLog` (satu entri per hari, timpa jika sama).
-- [ ] **1.6** Buat `charts.js` dengan `renderLineChart(container, points, options)` berbasis SVG. Tampilkan grafik berat 30/90 hari dengan garis target.
-- [ ] **1.7** **Pengaturan:** tema terang/gelap (gunakan CSS variables), satuan kg/lb (konversi hanya di tampilan, simpan selalu dalam kg/cm).
-- [ ] **1.8** **Data & privasi:** tombol ekspor data (unduh JSON), impor data, dan hapus semua data (dengan dialog konfirmasi). Tampilkan pernyataan: "Data tersimpan di perangkatmu dan tidak dikirim ke server."
-- [ ] **1.9** **Tentang & disclaimer:** versi aplikasi dan teks "NutriKala memberi informasi umum, bukan pengganti saran dokter atau ahli gizi."
-- [ ] **1.10** State kosong: jika profil belum diisi, tampilkan ajakan ramah untuk melengkapinya.
+- [x] **1.1** Buat `profile.js` dan render di tab Akun.
+- [x] **1.2** **Form profil:** nama, tahun lahir/usia, jenis kelamin, tinggi, berat, tingkat aktivitas, tujuan, berat target. Validasi rentang masuk akal (tinggi 100–250 cm, berat 20–300 kg, usia 10–100).
+- [x] **1.3** **Kartu ringkasan** di atas halaman: BMI, kategori, BMR, TDEE, dan target kalori harian (hitung via `nutrition.js`).
+- [x] **1.4** **Pra-isi kalkulator BMI** dari profil agar pengguna tidak mengisi ulang. Pertahankan kalkulator tetap bisa dipakai tanpa profil.
+- [x] **1.5** **Riwayat berat badan:** tombol "Catat berat hari ini" menyimpan ke `weightLog` (satu entri per hari, timpa jika sama).
+- [x] **1.6** Buat `charts.js` dengan `renderLineChart(container, points, options)` berbasis SVG. Tampilkan grafik berat 30/90 hari dengan garis target.
+- [x] **1.7** **Pengaturan:** tema terang/gelap (gunakan CSS variables), satuan kg/lb (konversi hanya di tampilan, simpan selalu dalam kg/cm).
+- [x] **1.8** **Data & privasi:** tombol ekspor data (unduh JSON), impor data, dan hapus semua data (dengan dialog konfirmasi). Tampilkan pernyataan: "Data tersimpan di perangkatmu dan tidak dikirim ke server."
+- [x] **1.9** **Tentang & disclaimer:** versi aplikasi dan teks "NutriKala memberi informasi umum, bukan pengganti saran dokter atau ahli gizi."
+- [x] **1.10** State kosong: jika profil belum diisi, tampilkan ajakan ramah untuk melengkapinya.
 
 **Kriteria selesai:**
 - Profil tersimpan dan tetap ada setelah reload/offline.
@@ -302,3 +302,13 @@ Sebelum menandai fase selesai:
   - `sw.js`: `nutrition.js` masuk app shell, cache naik ke `nutrikala-shell-v2`.
   - Uji otomatis rumus lewat node lolos (BMR 1561,25; TDEE 1874; target lose 1374 → di-clamp ke 1500 + `dibatasi:true`; MET 3,5×60×30 mnt = 105 kkal). Verifikasi browser manual (offline, BMI/hidrasi tetap jalan) harus dicek di `http://localhost/Bmi-Calc/`.
   - Seluruh perubahan masih berupa teks Indonesia, tanpa `innerHTML`, tanpa `localStorage` langsung di luar `storage.js`.
+
+- **21 Okt 2026 — Fase 1.**
+  - **1.1:** mengikuti pola repo — markup halaman Akun dirender statis di `index.html`, dan `profile.js` mengekspor `renderProfilePage(container, { onProfilTersimpan })` yang diisi + memasang event, mirip cara `app.js` mengurusi Kalkulator. Skeleton HTML dipilih lambung konsisten dengan halaman Kalkulator yang sudah begitu.
+  - **1.2:** usia disimpan sebagai angka `usia` (bukan tahun lahir) demi kesederhanaan; berat boleh desimal (0,1 kg).
+  - **1.5:** mencatat berat otomatis memperbarui `weightKg` di profil (berat terbaru = data profil terkini).
+  - **1.7:** tema via `data-tema="gelap"` di `<html>` + blok `:root[data-tema="gelap"]` pada `style.css`; `theme-color` meta ikut diganti. Konfirmasi "hapus semua" memakai `window.confirm()` (paling sederhana, tanpa komponen modal baru) — dicatat sebagai penyimpangan kecil dari "dialog konfirmasi".
+  - **1.6:** `charts.js` aman tanpa innerHTML (createElementNS), skala & label tanggal otomatis; grafik menampilkan nol data dengan pesan ramah.
+  - Pra-isi kalkulator (1.4) men-tack lag clamp ke rentang slider (usia ≤90, berat bulat, tinggi 120–220) — slider tak mendukung desimal; profil menyimpan nilai aslinya.
+  - Uji node: roundtrip simpan/ekspor/impor/hapus profile + weightLog semua `OK`; sintaks semua modul `node --check` `OK`.
+  - Perlu verifikasi manual di `http://localhost/Bmi-Calc/`: tab Akun, tema gelap, ekspor-impor, grafik, dan BMI/hidrasi lama tetap jalan.
