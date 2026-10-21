@@ -225,16 +225,16 @@ Tugas 2.1–2.10 adalah inti. Tugas 2.11–2.13 hanya dikerjakan setelah inti st
 
 **Tugas:**
 
-- [ ] **3.1** Isi `EXERCISES` di `data.js`: **minimal 25 latihan**, dengan nilai MET yang wajar. Campuran kardio (jalan, jogging, bersepeda, lompat tali, senam), kekuatan (push-up, squat, plank, sit-up, lunges), dan peregangan/yoga. Sertakan langkah singkat 3–5 poin per latihan.
-- [ ] **3.2** Buat `workout.js` dan render di tab Olahraga.
-- [ ] **3.3** **Ringkasan mingguan:** progress bar menit aktif minggu ini terhadap target 150 menit, total kalori terbakar, dan **streak** hari aktif beruntun.
-- [ ] **3.4** **Pencatat aktivitas:** pilih latihan, isi durasi, kalori dihitung otomatis lewat rumus MET memakai berat dari profil (bawaan 60 kg jika belum ada profil). Pengguna boleh menimpa angka kalori.
-- [ ] **3.5** **Katalog latihan** dengan filter: kategori, durasi (≤10, ≤20, ≤30 menit), lokasi (tanpa alat/rumah, luar, gym), tingkat.
-- [ ] **3.6** **Detail latihan:** langkah gerakan, tips keselamatan, dan tombol "Catat" atau "Mulai".
-- [ ] **3.7** **Rekomendasi sesuai tujuan** dari profil (menurunkan berat → kardio + kekuatan ringan; menaikkan → kekuatan; menjaga → campuran).
-- [ ] **3.8** **Timer latihan:** interval kerja/istirahat yang dapat diatur, dengan getar (`navigator.vibrate`) dan/atau bunyi singkat pada pergantian. Timer harus tetap akurat meski layar mati sebentar (hitung dari timestamp, bukan dari hitungan `setInterval`).
-- [ ] **3.9** **Riwayat:** daftar aktivitas per hari, dengan hapus entri.
-- [ ] **3.10** Tambahkan peringatan kesehatan singkat: "Hentikan latihan jika terasa nyeri dada, pusing, atau sesak. Konsultasikan dengan dokter bila punya kondisi medis."
+- [x] **3.1** Isi `EXERCISES` di `data.js`: **minimal 25 latihan**, dengan nilai MET yang wajar. Campuran kardio (jalan, jogging, bersepeda, lompat tali, senam), kekuatan (push-up, squat, plank, sit-up, lunges), dan peregangan/yoga. Sertakan langkah singkat 3–5 poin per latihan.
+- [x] **3.2** Buat `workout.js` dan render di tab Olahraga.
+- [x] **3.3** **Ringkasan mingguan:** progress bar menit aktif minggu ini terhadap target 150 menit, total kalori terbakar, dan **streak** hari aktif beruntun.
+- [x] **3.4** **Pencatat aktivitas:** pilih latihan, isi durasi, kalori dihitung otomatis lewat rumus MET memakai berat dari profil (bawaan 60 kg jika belum ada profil). Pengguna boleh menimpa angka kalori.
+- [x] **3.5** **Katalog latihan** dengan filter: kategori, durasi (≤10, ≤20, ≤30 menit), lokasi (tanpa alat/rumah, luar, gym), tingkat.
+- [x] **3.6** **Detail latihan:** langkah gerakan, tips keselamatan, dan tombol "Catat" atau "Mulai".
+- [x] **3.7** **Rekomendasi sesuai tujuan** dari profil (menurunkan berat → kardio + kekuatan ringan; menaikkan → kekuatan; menjaga → campuran).
+- [x] **3.8** **Timer latihan:** interval kerja/istirahat yang dapat diatur, dengan getar (`navigator.vibrate`) dan/atau bunyi singkat pada pergantian. Timer harus tetap akurat meski layar mati sebentar (hitung dari timestamp, bukan dari hitungan `setInterval`).
+- [x] **3.9** **Riwayat:** daftar aktivitas per hari, dengan hapus entri.
+- [x] **3.10** Tambahkan peringatan kesehatan singkat: "Hentikan latihan jika terasa nyeri dada, pusing, atau sesak. Konsultasikan dengan dokter bila punya kondisi medis."
 - [ ] **3.11** _(Lanjutan)_ Hubungkan kalori olahraga ke halaman Pola Makan sebagai informasi "kalori terbakar hari ini" (tampilkan saja, **jangan** otomatis menambah jatah makan).
 
 **Kriteria selesai:**
@@ -333,3 +333,17 @@ Sebelum menandai fase selesai:
   - `sw.js`: `meals.js` masuk app shell, cache naik ke `nutrikala-shell-v4`.
   - Uji node: 64 makanan urut abjad/id unik/lengkap `OK`; log per tanggal, favorit, terbaru (dedupe + maks 10), makanan kustom + validasi `OK`; sintaks semua modul `node --check` `OK`.
   - Perlu verifikasi manual di `http://localhost/Bmi-Calc/`: tab Pola Makan (ring, slot, dialog, porsi, kustom, undo), memastikan BMI/hidrasi Akun lama tetap jalan.
+
+- **21 Okt 2026 — Fase 3 (inti 3.1–3.10).**
+  - **3.1:** `EXERCISES` berisi 28 latihan (kardio/kekuatan/peregangan) urut abjad dengan MET rata-rata, `steps` 3-5 poin, `tips` keselamatan opsional; ditambah `KATEGORI_LATIHAN`, `TEMPAT_LATIHAN` (kunci `tanpa-alat|luar|gym` sesuai desain), `TINGKAT_LATIHAN`. Urutan abjad dijaga otomatis lewat skrip sortir sekali penulisan ulang.
+  - **3.2:** mengikuti pola `profile.js`/`meals.js` — markup statis di `index.html`, `workout.js` mengekspor `renderWorkoutPage(container)` dengan event delegasi & guard idempoten. Halaman memakai prefix CSS `wo__` dan id `wo*` agar tidak bentrok dengan id `meal*`/`btnHariIni` milik meals.
+  - **3.3:** minggu dihitung dari Senin (`(getDay()+6)%7`); streak = hari aktif beruntun, berjalan dari hari ini, turun ke kemarin bila hari ini belum aktif. Bar progress aria-valuenow dijaga.
+  - **3.4:** kalori via `kaloriOlahraga(met, berat, menit)` dari `nutrition.js`; berat dari profil, fallback 60 kg. Checkbox "timpa manual" membuka input kkal (1–5000) yang diberi penanda `kcalManual` pada entri.
+  - **3.5:** empat `<select>` filter (kategori, durasi ≤10/≤20/≤30, tempat, tingkat) state lokal + filter post-getAll; hasil kosong diberi pesan.
+  - **3.6:** detail sebagai section `#woDetail` dinamis (bukan dialog) berisi langkah, tips, dan tombol "Catat" (prefill dialog) serta "Mulai interval" (mengisi timer).
+  - **3.7:** rekomendasi dari `profil.goal`: lose → kardio dulu, gain → kekuatan, maintain → campuran; tanpa profil tampil teks umum + 6 chip.
+  - **3.8:** timer menghitung sisa fase dari `Date.now() - mulaiEpoch` (bukan penghitungan interval), sehingga tetap akurat saat tab dipindah; interval 500 ms hanya untuk tampilan. Pergantian fase memakai `navigator.vibrate` + bip pendek WebAudio (guard tanpa dukungan).
+  - **3.9:** riwayat list per tanggal dengan navigasi hari (prefix `woHari*`), hapus + urungkan memakai `toastAksi`.
+  - **3.10:** peringatan kesehatan jeda tampil di kartu timer (`#woPeringatan`).
+  - `sw.js`: `workout.js` masuk app shell, cache naik ke `nutrikala-shell-v5`.
+  - Uji node: MET (264/100/90 kkal, invalid → null), Senin- sebagai awal minggu (4 kasus), log per tanggal, validasi entri jelek, streak (3/3/0) semua `OK`; `node --check` 11 modul `OK`. Perlu verifikasi manual timer di browser + Lighthouse di Fase 4.
