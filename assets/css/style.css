@@ -63,6 +63,12 @@
   /* Lain-lain */
   --tinggi-nav: 68px;
   --ease-hangat: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --c-nav-bg: rgba(255, 250, 243, 0.94);
+  --c-toast-bg: var(--c-teks);
+  --c-toast-teks: #fff;
+  --c-skor-bg: var(--c-teks);
+  --c-skor-teks: #fff;
 }
 
 /* --------------------------------------------------------------------------
@@ -1114,5 +1120,289 @@ button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   18. Halaman Akun (profile-*)
+   ========================================================================== */
+
+.profile__sapaan {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--c-teks-redup);
+}
+
+.profile__angkaGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-2);
+}
+
+.profile__angkaKotak {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: var(--sp-3) var(--sp-1);
+  border: 1px solid var(--c-garis);
+  border-radius: var(--r-sedang);
+  background: var(--c-kartu-lembut);
+  text-align: center;
+}
+
+.profile__angkaLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--c-teks-redup);
+}
+
+.profile__angkaNilai {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--c-utama);
+  font-variant-numeric: tabular-nums;
+}
+
+.profile__peringatan {
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-left: 4px solid var(--c-kurang);
+  border-radius: 4px var(--r-kecil) var(--r-kecil) 4px;
+  background: var(--c-kurang-bg);
+  color: var(--c-kurang-teks);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.profile__ajakan {
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px dashed var(--c-aprikot);
+  border-radius: var(--r-sedang);
+  background: var(--c-kartu-lembut);
+  color: var(--c-teks-redup);
+  font-size: 0.85rem;
+}
+
+/* --- Form profil ---------------------------------------------------------- */
+
+.profile__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3) var(--sp-3);
+}
+
+.profile__field--penuh {
+  grid-column: 1 / -1;
+}
+
+.profile__label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--c-teks);
+}
+
+.profile__input {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--c-garis);
+  border-radius: var(--r-kecil);
+  background: var(--c-kartu-lembut);
+  color: var(--c-teks);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.profile__input::placeholder {
+  color: var(--c-teks-mati);
+  font-weight: 500;
+}
+
+/* --- Catat berat & grafik ------------------------------------------------- */
+
+.profile__catatBaris {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--sp-3);
+  align-items: end;
+}
+
+.profile__rentang {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.profile__chip {
+  min-height: 40px;
+  padding: 0 var(--sp-4);
+  border: 1.5px solid var(--c-garis);
+  border-radius: var(--r-bulat);
+  background: var(--c-kartu-lembut);
+  color: var(--c-teks-redup);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: border-color 0.2s var(--ease-hangat),
+              background 0.2s var(--ease-hangat), color 0.2s var(--ease-hangat);
+}
+
+.profile__chip--aktif {
+  border-color: var(--c-utama);
+  background: var(--c-utama-muda);
+  color: var(--c-utama-tua);
+}
+
+.profile__grafikKosong {
+  padding: var(--sp-5) 0;
+  color: var(--c-teks-mati);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.grafik__label {
+  fill: var(--c-teks-mati);
+}
+
+/* --- Pengaturan ----------------------------------------------------------- */
+
+.profile__pengaturanBaris {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.profile__tombolKolom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.tombol--bahaya {
+  border: 1.5px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.tombol--bahaya:hover {
+  background: #fee2e2;
+}
+
+.profile__privasi {
+  font-size: 0.82rem;
+  color: var(--c-teks-redup);
+}
+
+.profile__tentang {
+  font-size: 0.86rem;
+  color: var(--c-teks-redup);
+}
+
+/* ==========================================================================
+   19. Tema Gelap (data-tema="gelap" di <html>)
+   ========================================================================== */
+
+:root[data-tema="gelap"] {
+  --c-latar: #221a13;
+  --c-latar-2: #1a1310;
+  --c-kartu: #2d231b;
+  --c-kartu-lembut: #382b21;
+
+  --c-utama: #fb923c;
+  --c-utama-tua: #ffb874;
+  --c-utama-muda: #3a2b21;
+  --c-madu: #fbbf24;
+  --c-aprikot: #5a4130;
+  --c-aprikot-tua: #d97706;
+  --c-peach: #382b21;
+
+  --c-teks: #f3e8dd;
+  --c-teks-redup: #d6bfa8;
+  --c-teks-mati: #b59d85;
+  --c-garis: #4a3526;
+  --c-fokus: #fb923c;
+
+  --c-kurang: #fbbf24;
+  --c-kurang-teks: #fcd34d;
+  --c-kurang-bg: #45300f;
+  --c-ideal: #4ade80;
+  --c-ideal-teks: #86efac;
+  --c-ideal-bg: #14351f;
+  --c-lebih: #fb923c;
+  --c-lebih-teks: #fdba74;
+  --c-lebih-bg: #462a16;
+
+  --bayang-kartu: 0 8px 24px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --bayang-lembut: 0 4px 14px rgba(0, 0, 0, 0.3);
+  --bayang-tombol: 0 8px 18px rgba(0, 0, 0, 0.35);
+
+  --c-nav-bg: rgba(34, 26, 19, 0.94);
+  --c-toast-bg: #f3e8dd;
+  --c-toast-teks: #2d231b;
+  --c-skor-bg: var(--c-utama);
+  --c-skor-teks: #3f2d21;
+}
+
+:root[data-tema="gelap"] .nav {
+  background: var(--c-nav-bg);
+}
+
+:root[data-tema="gelap"] .toast {
+  background: var(--c-toast-bg);
+  color: var(--c-toast-teks);
+}
+
+:root[data-tema="gelap"] .skala__penandaNilai {
+  background: var(--c-skor-bg);
+  color: var(--c-skor-teks);
+}
+
+:root[data-tema="gelap"] .banner {
+  background: linear-gradient(135deg, #4a3018 0%, #6b3a14 55%, #8a431a 100%);
+}
+
+:root[data-tema="gelap"] .banner__sapaan {
+  background: rgba(0, 0, 0, 0.28);
+  color: #fdba74;
+}
+
+:root[data-tema="gelap"] .banner__teks {
+  color: #ffedd5;
+}
+
+:root[data-tema="gelap"] .banner::after {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+:root[data-tema="gelap"] .banner::before {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-tema="gelap"] .aktivitas__label:has(.aktivitas__centang:checked) {
+  background: #173a24;
+  border-color: #256d3f;
+}
+
+:root[data-tema="gelap"] .tombol--bahaya {
+  border-color: #7f1d1d;
+  background: #3a1a1a;
+  color: #fca5a5;
+}
+
+:root[data-tema="gelap"] .tombol--bahaya:hover {
+  background: #471e1e;
+}
+
+/* Desktop bingkai lembut pada tema gelap */
+@media (min-width: 460px) {
+  :root[data-tema="gelap"] body {
+    background: var(--c-latar-2);
+  }
+
+  :root[data-tema="gelap"] .aplikasi {
+    box-shadow: 0 0 0 1px var(--c-garis), 0 20px 50px rgba(0, 0, 0, 0.5);
   }
 }
