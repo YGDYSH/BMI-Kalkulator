@@ -255,15 +255,58 @@ export function fokusHalaman(tab) {
    Toast kecil untuk umpan balik
    -------------------------------------------------------------------------- */
 export function toast(pesan) {
+  toastIsiAmbil();
+  tuangkanTeksToast(pesan);
+  tampilkanToast();
+}
+
+/**
+ * Toast dengan tombol aksi (mis. "Urungkan"). Hilang setelah `durasi` ms.
+ * Membangun elemen dengan createElement — aman terhadap input pengguna.
+ */
+export function toastAksi(pesan, teksTombol, aksi, durasi = 5000) {
   if (!el.toast) return;
+  tuangkanTeksToast(pesan);
+
+  const tombol = document.createElement('button');
+  tombol.type = 'button';
+  tombol.className = 'toast__tombol';
+  tombol.textContent = teksTombol;
+  tombol.addEventListener('click', () => {
+    sembunyikanToast();
+    if (typeof aksi === 'function') aksi();
+  });
+  el.toast.appendChild(tombol);
   clearTimeout(jedaToast);
-  el.toast.textContent = pesan;
+  tampilkanToast(durasi);
+}
+
+/** Kosongkan isi toast dan isi pesan dengan textContent (aman). */
+function tuangkanTeksToast(pesan) {
+  el.toast.replaceChildren();
+  const teksSp = document.createElement('span');
+  teksSp.className = 'toast__teks';
+  teksSp.textContent = pesan;
+  el.toast.appendChild(teksSp);
+}
+
+function tampilkanToast(durasi = 2600) {
+  clearTimeout(jedaToast);
   el.toast.hidden = false;
   requestAnimationFrame(() => el.toast.classList.add('tampil'));
-  jedaToast = setTimeout(() => {
-    el.toast.classList.remove('tampil');
-    setTimeout(() => { el.toast.hidden = true; }, 260);
-  }, 2600);
+  jedaToast = setTimeout(sembunyikanToast, durasi);
+}
+
+/** Sembunyikan toast dengan transisi kecil. */
+function sembunyikanToast() {
+  clearTimeout(jedaToast);
+  el.toast.classList.remove('tampil');
+  setTimeout(() => { el.toast.hidden = true; }, 260);
+}
+
+/** Pastikan referensi toast terisi. */
+function toastIsiAmbil() {
+  if (!el.toast) el.toast = document.getElementById('toast');
 }
 
 /* --------------------------------------------------------------------------
