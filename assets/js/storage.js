@@ -12,7 +12,13 @@ const KEY = {
   riwayat: 'nutrikala:riwayat-bmi',
   tab: 'nutrikala:tab',
   skema: 'nutrikala:schemaVersion',
+  profil: 'nutrikala:profile',
+  berat: 'nutrikala:weightLog',
+  pengaturan: 'nutrikala:settings',
 };
+
+/** Prefiks semua kunci milik NutriKala (untuk ekspor/hapus total). */
+const PREFIKS = 'nutrikala:';
 
 /** Versi skema data saat ini. Naikkan bila struktur penyimpanan berubah. */
 export const VERSI_SKEMA = 1;
@@ -238,4 +244,208 @@ export function muatTabAktif(fallback) {
 
 export function simpanTabAktif(tab) {
   return amanSimpan(KEY.tab, tab);
+}
+
+/* --------------------------------------------------------------------------
+   Profil pengguna (nutrikala:profile)
+   -------------------------------------------------------------------------- */
+
+/** Kunci nilai profil yang valid + rentang masuk akal (desain.md 1.2). */
+export const RENTANG_PROFIL = {
+  usia: { min: 10, max: 100, default: 25 },
+  tinggiCm: { min: 100, max: 250, default: 165 },
+  weightKg: { min: 20, max: 300, default: 60 },
+  targetWeightKg: { min: 20, max: 300, default: 60 },
+};
+
+const SEX_VALID = ['male', 'female'];
+const ACTIVITY_VALID = ['sedentary', 'light', 'moderate', 'active', 'very_active'];
+const GOAL_VALID = ['lose', 'maintain', 'gain'];
+const SATUAN_VALID = ['kg', 'lb'];
+const TEMA_VALID = ['terang', 'gelap'];
+
+/** Amankan angka ke rentang; null bila kosong/tidak valid. */
+function angkaProfil(nilai, rentang) {
+  const angka = Number(nilai);
+  if (!Number.isFinite(angka)) return null;
+  return Math.min(rentang.max, Math.max(rentang.min, Math.round(angka)));
+}
+
+/** Amankan angka desimal (0,1 kg) untuk berat badan. */
+function angkaBeratProfil(nilai, rentang) {
+  const angka = Number(nilai);
+  if (!Number.isFinite(angka)) return null;
+  const bulat = Math.round(angka * 10) / 10;
+  return Math.min(rentang.max, Math.max(rentang.min, bulat));
+}
+
+export function muatProfil() {
+  const data = amanAmbil(KEY.profil);
+  if (!data || typeof data !== 'object') return null;
+
+  const profil = {
+    name: typeof data.name === 'string' ? data.name.slice(0, 40) : '',
+    usia: angkaProfil(data.usia, RENTANG_PROFIL.usia),
+    sex: SEX_VALID.includes(data.sex) ? data.sex : null,
+    heightCm: angkaProfil(data.heightCm, RENTANG_PROFIL.tinggiCm),
+    weightKg: angkaBeratProfil(data.weightKg, RENTANG_PROFIL.weightKg),
+    activity: ACTIVITY_VALID.includes(data.activity) ? data.activity : 'sedentary',
+    goal: GOAL_VALID.includes(data.goal) ? data.goal : 'maintain',
+    targetWeightKg: angkaBeratProfil(data.targetWeightKg, RENTANG_PROFIL.targetWeightKg),
+    updatedAt: typeof data.updatedAt === 'string' ? data.updatedAt : '',
+  };
+
+  // Profil dianggap valid bila keenam nilai wajib terisi.
+  if (profil.usia === null || profil.heightCm === null ||
+      profil.weightKg === null || !profil.sex) return null;
+  return profil;
+}
+
+/** Simpan profil (ditandai updatedAt). Mengembalikan profil yang tersimpan. */
+export function simpanProfil(profil) {
+  const bersih = {
+    ...profil,
+    updatedAt: new Date().toISOString(),
+  };
+  const ok = amanSimpan(KEY.profil, bersih);
+  return ok ? bersih : null;
+}
+
+export function hapusProfil() {
+  amanHapus(KEY.profil);
+}
+
+/* --------------------------------------------------------------------------
+   Log berat badan (nutrikala:weightLog) — array {date, weightKg}
+   -------------------------------------------------------------------------- */
+
+/** Batas entri log berat. */
+export const MAKS_LOG_BERAT = 120;
+
+export function muatLogBerat() {
+  const data = amanAmbil(KEY.berat);
+  if (!Array.isArray(data)) return [];
+  return data
+    .filter((entri) => entri &&
+      typeof entri.date === 'string' && Number.isFinite(Number(entri.weightKg)))
+    .map((entri) => ({ date: entri.date, weightKg: Number(entri.weightKg) }))
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+    .slice(-MAKS_LOG_BERAT);
+}
+
+/** Catat berat hari ini; satu entri per hari (timpa bila sama). */
+export function catatBerat(weightKg) {
+  const angka = Number(weightKg);
+  if (!Number.isFinite(angka) || angka < RENTANG_PROFIL.weightKg.min ||
+      angka > RENTANG_PROFIL.weightKg.max) return null;
+
+  const log = muatLogBerat();
+  const tanggal = tanggalHariIni();
+  const exist = log.findIndex((entri) => entri.date === tanggal);
+
+  if (exist >= 0) {
+    log[exist].weightKg = angka;
+  } else {
+    log.push({ date: tanggal, weightKg: angka });
+  }
+
+  const terpotong = log.slice(-MAKS_LOG_BERAT);
+  return amanSimpan(KEY.berat, terpotong) ? terpotong : null;
+}
+
+export function hapusLogBerat() {
+  amanHapus(KEY.berat);
+}
+
+/* --------------------------------------------------------------------------
+   Pengaturan (nutrikala:settings) — tema & satuan tampilan
+   -------------------------------------------------------------------------- */
+
+export function muatPengaturan() {
+  const data = amanAmbil(KEY.pengaturan);
+  return {
+    tema: data && TEMA_VALID.includes(data.tema) ? data.tema : 'terang',
+    satuan: data && SATUAN_VALID.includes(data.satuan) ? data.satuan : 'kg',
+  };
+}
+
+export function simpanPengaturan(pengaturan) {
+  const sekarang = muatPengaturan();
+  const tema = TEMA_VALID.includes(pengaturan.tema) ? pengaturan.tema : sekarang.tema;
+  const satuan = SATUAN_VALID.includes(pengaturan.satuan) ? pengaturan.satuan : sekarang.satuan;
+  return amanSimpan(KEY.pengaturan, { tema, satuan });
+}
+
+/* --------------------------------------------------------------------------
+   Ekspor / impor / hapus total (Data & Privasi)
+   Semua akses localStorage di sini — tempatnya memang di storage.js.
+   -------------------------------------------------------------------------- */
+
+/** Kumpulkan seluruh data NutriKala untuk ekspor JSON. */
+export function kumpulkanSemuaData() {
+  const isi = {};
+  try {
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const kunci = window.localStorage.key(i);
+      if (kunci && kunci.startsWith(PREFIKS)) isi[kunci] = amanAmbil(kunci);
+    }
+  } catch (err) {
+    console.warn('[NutriKala] Gagal mengumpulkan data:', err);
+    return null;
+  }
+  return {
+    aplikasi: 'nutrikala',
+    versiSkema: muatSchemaVersion() || VERSI_SKEMA,
+    diekspor: new Date().toISOString(),
+    data: isi,
+  };
+}
+
+/**
+ * Timpa data lokal dengan isi eksporan.
+ * Kembalikan jumlah kunci yang dituliskan, atau null bila format tidak valid.
+ */
+export function timpaDenganData(berkas) {
+  if (!berkas || typeof berkas !== 'object') return null;
+  if (berkas.aplikasi !== 'nutrikala') return null;
+  if (!berkas.data || typeof berkas.data !== 'object') return null;
+
+  const entri = Object.entries(berkas.data).filter(([kunci]) =>
+    kunci.startsWith(PREFIKS));
+  if (entri.length === 0) return null;
+
+  try {
+    // Bersihkan dulu agar impor benar-benar menggantikan, bukan menumpuk.
+    const hapusLama = [];
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const kunci = window.localStorage.key(i);
+      if (kunci && kunci.startsWith(PREFIKS)) hapusLama.push(kunci);
+    }
+    hapusLama.forEach((kunci) => window.localStorage.removeItem(kunci));
+
+    let jumlah = 0;
+    for (const [kunci, nilai] of entri) {
+      if (amanSimpan(kunci, nilai)) jumlah++;
+    }
+    return jumlah;
+  } catch (err) {
+    console.warn('[NutriKala] Gagal mengimpor data:', err);
+    return null;
+  }
+}
+
+/** Hapus seluruh data NutriKala dari perangkat. */
+export function hapusSemuaData() {
+  try {
+    const daftar = [];
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const kunci = window.localStorage.key(i);
+      if (kunci && kunci.startsWith(PREFIKS)) daftar.push(kunci);
+    }
+    daftar.forEach((kunci) => window.localStorage.removeItem(kunci));
+    return true;
+  } catch (err) {
+    console.warn('[NutriKala] Gagal menghapus data:', err);
+    return false;
+  }
 }
