@@ -11,7 +11,11 @@ const KEY = {
   aktivitas: 'nutrikala:aktivitas',
   riwayat: 'nutrikala:riwayat-bmi',
   tab: 'nutrikala:tab',
+  skema: 'nutrikala:schemaVersion',
 };
+
+/** Versi skema data saat ini. Naikkan bila struktur penyimpanan berubah. */
+export const VERSI_SKEMA = 1;
 
 /** Batas entri riwayat BMI. */
 export const MAKS_RIWAYAT = 30;
@@ -60,6 +64,34 @@ export function amanHapus(kunci) {
   } catch (err) {
     console.warn('[NutriKala] Gagal menghapus storage:', err);
   }
+}
+
+/* --------------------------------------------------------------------------
+   Skema & migrasi (persiapan fitur baru; Fase 0 desain.md)
+   -------------------------------------------------------------------------- */
+
+/** Baca versi skema tersimpan. Null bila belum pernah ditulis (pengguna lama). */
+export function muatSchemaVersion() {
+  const data = amanAmbil(KEY.skema);
+  const nomor = Number(data);
+  return Number.isFinite(nomor) ? nomor : null;
+}
+
+function simpanSchemaVersion(nomor) {
+  return amanSimpan(KEY.skema, nomor);
+}
+
+/**
+ * Jalankan migrasi skema. Kosong dulu — saat versi dinaikkan nanti,
+ * tambahkan langkah `while` per versi di sini.
+ */
+export function migrate() {
+  let versi = muatSchemaVersion();
+  if (versi === null) {
+    versi = VERSI_SKEMA;
+    simpanSchemaVersion(versi);
+  }
+  return versi;
 }
 
 /* --------------------------------------------------------------------------
