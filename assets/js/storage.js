@@ -16,6 +16,7 @@ const KEY = {
   berat: 'nutrikala:weightLog',
   pengaturan: 'nutrikala:settings',
   logMakan: 'nutrikala:mealLog',
+  logOlahraga: 'nutrikala:workoutLog',
   favorit: 'nutrikala:favFoods',
   terbaru: 'nutrikala:recentFoods',
   kustom: 'nutrikala:foodKustom',
@@ -480,6 +481,52 @@ export function simpanLogMakan(tanggal, entri) {
     data[tanggal] = entri;
   }
   return amanSimpan(KEY.logMakan, data);
+}
+
+/* --------------------------------------------------------------------------
+   Log olahraga per tanggal (nutrikala:workoutLog) — { "YYYY-MM-DD": [entri...] }
+   Entri: { id, exerciseId, name, minutes, kcal, kcalManual, icon, addedAt }
+   -------------------------------------------------------------------------- */
+
+function entriOlahragaValid(item) {
+  return item
+    && typeof item.id === 'string'
+    && typeof item.exerciseId === 'string'
+    && typeof item.name === 'string'
+    && Number.isFinite(Number(item.minutes)) && Number(item.minutes) > 0
+    && Number(item.minutes) <= 600
+    && Number.isFinite(Number(item.kcal)) && Number(item.kcal) >= 0
+    && Number(item.kcal) <= 5000;
+}
+
+export function muatLogOlahraga(tanggal) {
+  const data = muatObjekAntarTanggal(KEY.logOlahraga);
+  const entri = data[tanggal];
+  if (!Array.isArray(entri)) return [];
+  return entri.filter(entriOlahragaValid);
+}
+
+export function simpanLogOlahraga(tanggal, entri) {
+  const data = muatObjekAntarTanggal(KEY.logOlahraga);
+  if (!Array.isArray(entri) || entri.length === 0) {
+    delete data[tanggal];
+  } else {
+    data[tanggal] = entri.filter(entriOlahragaValid);
+  }
+  return amanSimpan(KEY.logOlahraga, data);
+}
+
+/** Seluruh log olahraga per tanggal (untuk ringkasan mingguan & streak). */
+export function muatSemuaLogOlahraga() {
+  const data = muatObjekAntarTanggal(KEY.logOlahraga);
+  const bersih = {};
+  for (const [tanggal, entri] of Object.entries(data)) {
+    if (Array.isArray(entri)) {
+      const valid = entri.filter(entriOlahragaValid);
+      if (valid.length > 0) bersih[tanggal] = valid;
+    }
+  }
+  return bersih;
 }
 
 /* --------------------------------------------------------------------------
