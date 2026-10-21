@@ -4,7 +4,7 @@
    Semua path RELATIF agar jalan di http://localhost/Bmi-Calc/.
    ========================================================================== */
 
-const VERSI = 'nutrikala-shell-v2';
+const VERSI = 'nutrikala-shell-v3';
 
 /** Berkas inti aplikasi yang harus bisa dibuka tanpa jaringan. */
 const APP_SHELL = [
@@ -14,9 +14,11 @@ const APP_SHELL = [
   './assets/css/style.css',
   './assets/js/app.js',
   './assets/js/bmi.js',
+  './assets/js/charts.js',
   './assets/js/data.js',
   './assets/js/hydration.js',
   './assets/js/nutrition.js',
+  './assets/js/profile.js',
   './assets/js/storage.js',
   './assets/js/ui.js',
   './assets/icons/icon-192.png',
