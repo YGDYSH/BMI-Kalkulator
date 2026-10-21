@@ -213,3 +213,522 @@ export const SLOT_MAKAN = {
   dinner: 'Makan Malam',
   snack: 'Camilan',
 };
+
+/**
+ * Katalog latihan (Fase 3): kardio, kekuatan, peregangan. `met` adalah nilai
+ * rata-rata Compendium of Physical Activities untuk orang dewasa umum.
+ * `steps` = langkah gerakan 3-5 poin; `tips` = catatan keselamatan.
+ * `place`: tanpa-alat | luar | gym ; `level`: pemula | sedang | mahir.
+ * Terurut abjad; JANGAN mengubah id yang sudah dipakai data pengguna.
+ */
+export const EXERCISES = [
+  {
+    "id": "aerobik-air",
+    "name": "Aerobik air",
+    "category": "kardio",
+    "met": 4,
+    "place": "gym",
+    "level": "pemula",
+    "minutes": 30,
+    "icon": "💦",
+    "steps": [
+      "Berdiri di kolam dengan air sebatas pinggang/pinggul.",
+      "Gerakkan selangkah langkah samping + ayunan tangan.",
+      "Naikkan lutut bergantian dan tekan air dengan tangan.",
+      "Terus bergerak 25-30 menit.",
+      "Rehat di tepi bila perlu."
+    ]
+  },
+  {
+    "id": "aerobik-rumah",
+    "name": "Aerobik di rumah",
+    "category": "kardio",
+    "met": 5,
+    "place": "tanpa-alat",
+    "level": "pemula",
+    "minutes": 20,
+    "icon": "💃",
+    "steps": [
+      "Pemanasan jalan di tempat 3 menit.",
+      "Ikuti gerak dasar: langkah kaki + ayunan tangan, 8 hitungan tiap sisi.",
+      "Naikkan lutut sedikit lebih tinggi tiap pergantian irama.",
+      "Putar musik yang nyaman dan terus bergerak 15-20 menit.",
+      "Akhiri dengan jalan santai + regang bahu 2 menit."
+    ],
+    "tips": "Pakai alas kaki empuk; jaga di area bebas barang bertajam."
+  },
+  {
+    "id": "bersepeda-cepat",
+    "name": "Bersepeda cepat",
+    "category": "kardio",
+    "met": 8,
+    "place": "luar",
+    "level": "sedang",
+    "minutes": 30,
+    "icon": "🚴",
+    "steps": [
+      "Cek rem dan tekanan ban sebelum berangkat.",
+      "Pemanasan pedal ringan 5 menit.",
+      "Naikkan kecepatan hingga napas lebih cepat namun masih bisa bicara, tahan 15 menit.",
+      "Santai 3 menit, lalu tambah 1 putaran lebih ngebut bila kuat.",
+      "Pendinginan pedal lambat 5 menit."
+    ],
+    "tips": "Pakai helm; pilih jalur yang tidak padat kendaraan."
+  },
+  {
+    "id": "bersepeda-santai",
+    "name": "Bersepeda santai",
+    "category": "kardio",
+    "met": 5.8,
+    "place": "luar",
+    "level": "pemula",
+    "minutes": 30,
+    "icon": "🚴‍♀️",
+    "steps": [
+      "Setel sadel agar kaki hampir lurus saat pedal di titik terbawah.",
+      "Pedal dengan tempo ringan dan santai.",
+      "Jaga ritme napas: kamu harus tetap bisa bernyanyi sambil mengayuh.",
+      "Akhiri pelan dan regangkan tungkai setelah turun."
+    ],
+    "tips": "Perhatikan jalanan licin, terutama pagi berkabut."
+  },
+  {
+    "id": "burpee",
+    "name": "Burpee",
+    "category": "kardio",
+    "met": 8,
+    "place": "tanpa-alat",
+    "level": "mahir",
+    "minutes": 10,
+    "icon": "🔥",
+    "steps": [
+      "Mulai berdiri, lalu jongkok dengan telapak tangan menapak lantai.",
+      "Lompat kaki ke belakang sampai posisi plank.",
+      "Tawar 1 push-up (opsional saat masih belajar).",
+      "Lompat kaki kembali ke posisi jongkok.",
+      "Tegak sambil melompat kecil, lalu ulangi 8-12 kali."
+    ],
+    "tips": "Gerak intens: hentikan bila pusing atau sesak berlebihan."
+  },
+  {
+    "id": "elliptical",
+    "name": "Elliptical",
+    "category": "kardio",
+    "met": 5,
+    "place": "gym",
+    "level": "pemula",
+    "minutes": 30,
+    "icon": "🌀",
+    "steps": [
+      "Naik mesin dengan dua kaki aman di pedal.",
+      "Tarik napas dan cairkan bahu; mulai gerak ringan 5 menit.",
+      "Gerakkan lengan & kaki secara kooperatif.",
+      "Gelombang 20 menit tempo sedang.",
+      "Pendinginan 5 menit pelan."
+    ]
+  },
+  {
+    "id": "hiking-santai",
+    "name": "Hiking jalur ringan",
+    "category": "kardio",
+    "met": 6,
+    "place": "luar",
+    "level": "sedang",
+    "minutes": 60,
+    "icon": "🥾",
+    "steps": [
+      "Gunakan sepatu yang melindungi pergelangan.",
+      "Mulai dengan pace santai; jaga bicara masih memungkinkan.",
+      "Minum sedikit tiap 20 menit.",
+      "Turun dengan langkah pendek dan pelan agar lutut terlindungi.",
+      "Regang tungkai setelah selesai jalur."
+    ],
+    "tips": "Berpergian dengan teman; bawa air dan bekal ringan."
+  },
+  {
+    "id": "jalan-cepat",
+    "name": "Jalan cepat",
+    "category": "kardio",
+    "met": 4.3,
+    "place": "luar",
+    "level": "pemula",
+    "minutes": 30,
+    "icon": "🚶",
+    "steps": [
+      "Berdiri tegak, pandangan ke arah depan.",
+      "Langkah lebih cepat dan panjang dari jalan biasa.",
+      "Ayun tangan menyertai langkah.",
+      "Pertahankan 25-30 menit; bicara masih memungkinkan.",
+      "Tutup dengan jalan santai 3 menit."
+    ],
+    "tips": "Gunakan sepatu dengan sol empuk agar lutut terlindungi."
+  },
+  {
+    "id": "treadmill-incline",
+    "name": "Jalan mendaki (treadmill)",
+    "category": "kardio",
+    "met": 6.3,
+    "place": "gym",
+    "level": "sedang",
+    "minutes": 30,
+    "icon": "⛰️",
+    "steps": [
+      "Setel incline 5-8% dan kecepatan santai.",
+      "Jalan tanpa memegang pegangan bila stabil.",
+      "Pertahankan 25-30 menit.",
+      "Turunkan incline bertahap untuk pendinginan."
+    ],
+    "tips": "Awas keringat membuat pegangan licin; dasarkan ritme ke nyaman bicara."
+  },
+  {
+    "id": "jalan-santai",
+    "name": "Jalan santai",
+    "category": "kardio",
+    "met": 3,
+    "place": "luar",
+    "level": "pemula",
+    "minutes": 20,
+    "icon": "🚶‍♀️",
+    "steps": [
+      "Langkah ringan dan melepas lelah.",
+      "Bahu dilonggarkan, tarik napas secara tertib.",
+      "Nikmati pemandangan hijau di sekitarmu.",
+      "Akhiri di tempat tenang sambil regang kaki sedikit."
+    ]
+  },
+  {
+    "id": "jogging-santai",
+    "name": "Jogging santai",
+    "category": "kardio",
+    "met": 6,
+    "place": "luar",
+    "level": "pemula",
+    "minutes": 30,
+    "icon": "🏃",
+    "steps": [
+      "Mulai dari jalan 3 menit.",
+      "Jog dengan irama santai 10 menit.",
+      "Selang-seling jalan-jog bila perlu.",
+      "Jaga postur tegak dan bahu longgar.",
+      "Akhiri jalan santai dan regang tungkai."
+    ],
+    "tips": "Mendarat lembut di tengah kaki, bukan menghentak tumit."
+  },
+  {
+    "id": "jogging-interval",
+    "name": "Lari interval",
+    "category": "kardio",
+    "met": 8,
+    "place": "luar",
+    "level": "mahir",
+    "minutes": 25,
+    "icon": "🏃‍♂️",
+    "steps": [
+      "Pemanasan jogging ringan 5 menit.",
+      "Fase sprint 1 menit dengan napas teratur.",
+      "Recovery jog 90 detik.",
+      "Ulangi siklus 5-6 kali.",
+      "Pendinginan jalan + regang kaki 5 menit."
+    ],
+    "tips": "Sesuaikan dengan kondisi; batalkan bila lutut perih."
+  },
+  {
+    "id": "mesin-angkat-kaki",
+    "name": "Latihan kaki (mesin)",
+    "category": "kekuatan",
+    "met": 3.5,
+    "place": "gym",
+    "level": "pemula",
+    "minutes": 30,
+    "icon": "🦿",
+    "steps": [
+      "Atur sadel mesin sesuai tinggi kaki.",
+      "Angkat beban dengan kontraksi otot tungkai.",
+      "Turunkan dengan kontrol 3 detik.",
+      "2-3 set @ 10-12 rep, rehat 60 detik."
+    ],
+    "tips": "Pilih beban ringan dulu; posisi badan jangan melengkung ke belakang."
+  },
+  {
+    "id": "lompat-tali",
+    "name": "Lompat tali",
+    "category": "kardio",
+    "met": 8.8,
+    "place": "tanpa-alat",
+    "level": "sedang",
+    "minutes": 15,
+    "icon": "🪢",
+    "steps": [
+      "Pegang ujung tali di samping pinggang, lompatan kecil.",
+      "Putar tali dari pergelangan, bukan seluruh lengan.",
+      "Mulai 30 detik lompat + 30 detik jalan di tempat.",
+      "Ulangi siklus 8-10 kali.",
+      "Tutup dengan regang betis dan punggung bawah."
+    ],
+    "tips": "Pilih lantai tidak terlalu keras; lutut tetap sedikit melentur saat mendarat."
+  },
+  {
+    "id": "lunges",
+    "name": "Lunges",
+    "category": "kekuatan",
+    "met": 4,
+    "place": "tanpa-alat",
+    "level": "pemula",
+    "minutes": 15,
+    "icon": "🦵",
+    "steps": [
+      "Berdiri tegak, lalu majukkan satu kaki jauh ke depan.",
+      "Turunkan lutut belakang hingga hampir menyentuh lantai.",
+      "Tumpuan bobot ada di tumit kaki depan.",
+      "Dorongan kaki depan untuk berdiri kembali.",
+      "Lakukan 10-12 kali per kaki × 2 set."
+    ],
+    "tips": "Lutut depan tidak melewati ujung kaki jauh; siku tetap stabil."
+  },
+  {
+    "id": "peregangan-total",
+    "name": "Peregangan total",
+    "category": "peregangan",
+    "met": 2.8,
+    "place": "tanpa-alat",
+    "level": "pemula",
+    "minutes": 15,
+    "icon": "🧘‍♀️",
+    "steps": [
+      "Regang leher & bahu dulu, 10-15 detik tiap arah.",
+      "Regang punggung atas & samping badan.",
+      "Regang tungkai belakang ( hamstring ) dan tungkai depan.",
+      "Tutup dengan tarik napas dalam 5 kali."
+    ]
+  },
+  {
+    "id": "plank",
+    "name": "Plank",
+    "category": "kekuatan",
+    "met": 3.5,
+    "place": "tanpa-alat",
+    "level": "pemula",
+    "minutes": 10,
+    "icon": "🧱",
+    "steps": [
+      "Siku tepat di bawah bahu, telapak lantai area kecil.",
+      "Tubuh membentuk satu garis: kepala–pinggul–tumit.",
+      "Tarik perut ke dalam dan jaga napas tertib.",
+      "Tahan 20-45 detik per putaran × 3 putaran.",
+      "Rehat 60 detik di antar putaran."
+    ],
+    "tips": "Jangan menurunkan pinggul; bila pegal, turunkan ke lutut sesaat."
+  },
+  {
+    "id": "push-up",
+    "name": "Push-up",
+    "category": "kekuatan",
+    "met": 4,
+    "place": "tanpa-alat",
+    "level": "sedang",
+    "minutes": 15,
+    "icon": "💪",
+    "steps": [
+      "Tangan di lantai selebar bahu, badan lurus.",
+      "Turunkan dada hingga hampir menyentuh lantai.",
+      "Siku membentuk 45 derajat dari badan.",
+      "Dorong tubuh naik dengan tenaga lengan dan dada.",
+      "Lakukan 2-3 set @ 8-15 kali, rehat 60 detik."
+    ],
+    "tips": "Pinggul tetap sejajar punggung; mulai versi lutut bila sulit."
+  },
+  {
+    "id": "regang-leher-bahu",
+    "name": "Regang leher & bahu",
+    "category": "peregangan",
+    "met": 2.5,
+    "place": "tanpa-alat",
+    "level": "pemula",
+    "minutes": 10,
+    "icon": "🙆",
+    "steps": [
+      "Miringkan kepala ke kanan sampai regang di leher, tahan 15 detik.",
+      "Regang bahu: tuum?ka? (gunakan sedikit tekanan tangan).",
+      "Tarik satu tangan melintang ke dada.",
+      "Ulangi sisi kiri dengan jeda yang sama."
+    ]
+  },
+  {
+    "id": "renang-santai",
+    "name": "Renang santai",
+    "category": "kardio",
+    "met": 5.3,
+    "place": "gym",
+    "level": "pemula",
+    "minutes": 45,
+    "icon": "🏊",
+    "steps": [
+      "Pemanasan mengapung + 2 lintasan dengan gaya apa pun yang mudah.",
+      "Berenang terus dengan irama nyaman 10-15 menit.",
+      "Rehat di tepi sesuai butuh.",
+      "Akhiri 1 lintasan pelan dan regang bahu di tepi kolam."
+    ],
+    "tips": "Hanya berenang di kolam yang ada penjaga; hindari makan besar langsung sebelumnya."
+  },
+  {
+    "id": "rowing-machine",
+    "name": "Rowing (dayung)",
+    "category": "kardio",
+    "met": 7,
+    "place": "gym",
+    "level": "sedang",
+    "minutes": 25,
+    "icon": "🚣",
+    "steps": [
+      "Genggam handle dengan genggaman santai.",
+      "Gerak dasar: kaki dorong → tarik tangan ke perut → pinggul menjauh.",
+      "Atur ritme 20-24 kali dorong per menit.",
+      "Berjalan terus 20-25 menit.",
+      "Akhiri regang punggung atas setelah selesai."
+    ],
+    "tips": "Dorongan dari kaki dahulu, bukan tarikan tangan sejak awal."
+  },
+  {
+    "id": "senam-zumba",
+    "name": "Senam (zumba)",
+    "category": "kardio",
+    "met": 6,
+    "place": "tanpa-alat",
+    "level": "pemula",
+    "minutes": 30,
+    "icon": "🕺",
+    "steps": [
+      "Pemanasan jalan sambil mengayun lengan 3 menit.",
+      "Ikuti gerak dasar program video/irama dengan cara yang menyenangkan.",
+      "Fokus gerak besar: lutut naik, tangan berputar, pinggul bergerak.",
+      "Terus bergerak 25-30 menit.",
+      "Sediakan air minum di sisi."
+    ],
+    "tips": "Amankan ruangan agar tidak tersandung benda di lantai."
+  },
+  {
+    "id": "sit-up",
+    "name": "Sit-up",
+    "category": "kekuatan",
+    "met": 4.3,
+    "place": "tanpa-alat",
+    "level": "pemula",
+    "minutes": 10,
+    "icon": "🧎",
+    "steps": [
+      "Telentang, lutut ditekuk, telapak kaki menapak.",
+      "Tangan santai di samping telinga (jangan menarik kepala).",
+      "Angkat badan dari lantai sambil buang napas.",
+      "Turunkan pelan dengan kontrol.",
+      "Lakukan 2-3 set @ 12-15 kali."
+    ],
+    "tips": "Gerakan dari perut, bukan tarikan kepala agar leher tidak pegal."
+  },
+  {
+    "id": "squat",
+    "name": "Squat",
+    "category": "kekuatan",
+    "met": 5,
+    "place": "tanpa-alat",
+    "level": "pemula",
+    "minutes": 15,
+    "icon": "🏋️",
+    "steps": [
+      "Kaki terbuka selebar bahu, ujung kaki sedikit keluar.",
+      "Dudukkan panggul ke belakang seperti akan duduk kursi.",
+      "Jaga punggung netral dan pandangan ke depan.",
+      "Turun sampai paha kira-kira 90 derajat.",
+      "Dorong tumit untuk berdiri; 3 set @ 10-15 rep."
+    ],
+    "tips": "Lutut tetap searah ujung kaki; jangan biarkan menekuk ke dalam."
+  },
+  {
+    "id": "tai-chi",
+    "name": "Tai chi",
+    "category": "peregangan",
+    "met": 3,
+    "place": "luar",
+    "level": "pemula",
+    "minutes": 30,
+    "icon": "☯️",
+    "steps": [
+      "Berdiri tenang, tarik napas perlahan.",
+      "Gerakan lambat mengalir mengikuti video atau guru.",
+      "Pindah bobot dengan lembut antara kaki.",
+      "Selaraskan napas dan irama gerakan.",
+      "Akhiri berdiri tenang 1 menit."
+    ]
+  },
+  {
+    "id": "tari-tradisional",
+    "name": "Tari tradisional",
+    "category": "kardio",
+    "met": 5.5,
+    "place": "tanpa-alat",
+    "level": "pemula",
+    "minutes": 30,
+    "icon": "🎭",
+    "steps": [
+      "Pemanasan jalan & ayunan tangan 3 menit.",
+      "Ikuti koreografi sederhana di video.",
+      "Tekankan gerak lengan, pinggul, dan langkah kaki.",
+      "Ganti gerak tiap lagu/repetisi supaya variasi.",
+      "Akhiri jalan santai 2 menit."
+    ]
+  },
+  {
+    "id": "yoga-mengalir",
+    "name": "Yoga mengalir",
+    "category": "peregangan",
+    "met": 4,
+    "place": "tanpa-alat",
+    "level": "sedang",
+    "minutes": 30,
+    "icon": "🧘",
+    "steps": [
+      "Mulai dari posisi duduk & tarik napas.",
+      "Ikuti aliran (vinyasa sederhana): anjing ke bawah, posisi low, dll.",
+      "Gerakkan satu sisi tubuh lalu sisi lain seimbang.",
+      "Tarik napas 4 hitungan masuk, 4 keluar.",
+      "Akhiri savasana (berbaring tenang) 3 menit."
+    ],
+    "tips": "Gunakan matras; berhenti bila ada titik nyeri tajam."
+  },
+  {
+    "id": "yoga-yin",
+    "name": "Yoga yin (lembut)",
+    "category": "peregangan",
+    "met": 2.5,
+    "place": "tanpa-alat",
+    "level": "pemula",
+    "minutes": 20,
+    "icon": "🕯️",
+    "steps": [
+      "Pilih posisi regang ringan; tahan 2-3 menit per posisi.",
+      "Gunakan bantal/pile sebagai penyangga bila perlu.",
+      "Rilekskan otot yang sedang diregangkan.",
+      "Napas lambat dan tenang sepanjang sesi."
+    ]
+  }
+];
+
+/** Nama kategori latihan (label pemilih filter). */
+export const KATEGORI_LATIHAN = {
+  kardio: 'Kardio',
+  kekuatan: 'Kekuatan',
+  peregangan: 'Peregangan',
+};
+
+/** Nama lokasi latihan. */
+export const TEMPAT_LATIHAN = {
+  'tanpa-alat': 'Tanpa alat / rumah',
+  luar: 'Luar ruang',
+  gym: 'Gym',
+};
+
+/** Nama tingkat latihan. */
+export const TINGKAT_LATIHAN = {
+  pemula: 'Pemula',
+  sedang: 'Sedang',
+  mahir: 'Mahir',
+};
