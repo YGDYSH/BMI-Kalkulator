@@ -726,27 +726,201 @@
         </div>
       </main>
 
-      <main
-        class="halaman halaman--placeholder"
-        id="page-olahraga"
-        data-page="olahraga"
-        hidden
-      >
-        <div class="placeholder">
-          <span class="placeholder__ikon" aria-hidden="true">🏃</span>
-          <h2 class="placeholder__judul">Olahraga</h2>
-          <p class="placeholder__teks">
-            Rencana gerak harian, video peregangan, dan tantangan langkah sedang
-            dalam perjalanan.
+      <main class="halaman" id="page-olahraga" data-page="olahraga" hidden>
+        <!-- Ringkasan mingguan (3.3) -->
+        <section class="kartu" aria-labelledby="woRingJudul">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="woRingJudul">Minggu Ini</h2>
+            <span class="lencana" id="woStreak" hidden>🔥 0 hari beruntun</span>
+          </div>
+
+          <p class="wo__label" id="woMenitLabel">0 / 150 menit aktif minggu ini</p>
+          <div class="wo__bar" role="progressbar" aria-label="Menit aktif minggu ini"
+            aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span class="wo__barIsi" id="woMenitBar"></span>
+          </div>
+
+          <div class="wo__angkaGrid">
+            <article class="wo__angkaKotak">
+              <span class="wo__angkaLabel">Kalori terbakar</span>
+              <span class="wo__angkaNilai" id="woKkal">0 kkal</span>
+            </article>
+            <article class="wo__angkaKotak">
+              <span class="wo__angkaLabel">Hari aktif</span>
+              <span class="wo__angkaNilai" id="woHariAktif">0 dari 7</span>
+            </article>
+          </div>
+
+          <p class="catatan">Acuan WHO: 150 menit aktivitas fisik sedang per minggu.</p>
+        </section>
+
+        <!-- Rekomendasi sesuai tujuan (3.7) -->
+        <section class="kartu" aria-labelledby="woRekoJudul">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="woRekoJudul">Rekomendasi</h2>
+          </div>
+          <p class="wo__teks" id="woRekoTeks">Sedang menyiapkan rekomendasi…</p>
+          <div class="wo__chipWadah" id="woRekoChips"></div>
+        </section>
+
+        <!-- Pencatat aktivitas + riwayat (3.4, 3.9) -->
+        <section class="kartu" aria-labelledby="woCatatJudul">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="woCatatJudul">Riwayat Aktivitas</h2>
+            <button class="tombol tombol--utama tombol--kecil" type="button" id="woBukaDialog">
+              + Catat
+            </button>
+          </div>
+
+          <div class="wo__nav">
+            <button class="wo__navTombol" type="button" id="woHariSebelum"
+              aria-label="Hari sebelumnya">‹</button>
+            <span class="wo__navLabel" id="woTanggalLabel"></span>
+            <button class="wo__navTombol" type="button" id="woHariBerikut"
+              aria-label="Hari berikutnya">›</button>
+            <button class="wo__navTombol wo__navTombol--hari" type="button" id="woHariIni" hidden>
+              Hari ini
+            </button>
+          </div>
+
+          <div class="wo__riwayat" id="woRiwayat"></div>
+        </section>
+
+        <!-- Katalog latihan + filter (3.5) -->
+        <section class="kartu" aria-labelledby="woKatalogJudul">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="woKatalogJudul">Katalog Latihan</h2>
+          </div>
+
+          <div class="wo__filtGrid">
+            <label class="wo__filtLabel">
+              Kategori
+              <select id="woFiltKategori" class="wo__pilih">
+                <option value="semua">Semua</option>
+                <option value="kardio">Kardio</option>
+                <option value="kekuatan">Kekuatan</option>
+                <option value="peregangan">Peregangan</option>
+              </select>
+            </label>
+            <label class="wo__filtLabel">
+              Durasi
+              <select id="woFiltDurasi" class="wo__pilih">
+                <option value="0">Semua</option>
+                <option value="10">≤ 10 menit</option>
+                <option value="20">≤ 20 menit</option>
+                <option value="30">≤ 30 menit</option>
+              </select>
+            </label>
+            <label class="wo__filtLabel">
+              Tempat
+              <select id="woFiltTempat" class="wo__pilih">
+                <option value="semua">Semua</option>
+                <option value="tanpa-alat">Tanpa alat / rumah</option>
+                <option value="luar">Luar ruang</option>
+                <option value="gym">Gym</option>
+              </select>
+            </label>
+            <label class="wo__filtLabel">
+              Tingkat
+              <select id="woFiltLevel" class="wo__pilih">
+                <option value="semua">Semua</option>
+                <option value="pemula">Pemula</option>
+                <option value="sedang">Sedang</option>
+                <option value="mahir">Mahir</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="wo__katalog" id="woKatalog"></div>
+        </section>
+
+        <!-- Detail latihan (3.6) -->
+        <section class="kartu" id="woDetail" hidden></section>
+
+        <!-- Timer interval (3.8) + peringatan (3.10) -->
+        <section class="kartu" id="woTimer" aria-labelledby="woTimerJudul">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="woTimerJudul">Timer Interval</h2>
+          </div>
+
+          <div class="wo__timerAtur">
+            <label class="wo__filtLabel">
+              Kerja (menit)
+              <input type="number" class="wo__pilih" id="woTimerKerja" value="2" min="1" max="60">
+            </label>
+            <label class="wo__filtLabel">
+              Istirahat (menit)
+              <input type="number" class="wo__pilih" id="woTimerIstirahat" value="1" min="0" max="30">
+            </label>
+            <label class="wo__filtLabel">
+              Putaran
+              <input type="number" class="wo__pilih" id="woTimerPutaran" value="4" min="1" max="20">
+            </label>
+          </div>
+
+          <div class="wo__timerTampil">
+            <span class="wo__timerFase" id="woTimerFase">Siap</span>
+            <span class="wo__timerAngka" id="woTimerAngka">02:00</span>
+            <span class="wo__timerPutaran" id="woTimerPutaranInfo"></span>
+          </div>
+          <div class="wo__bar wo__bar--kecil" aria-hidden="true">
+            <span class="wo__barIsi" id="woTimerBar"></span>
+          </div>
+
+          <div class="wo__timerAksi">
+            <button class="tombol tombol--utama" type="button" id="woTimerMulai">Mulai</button>
+            <button class="tombol tombol--garis" type="button" id="woTimerReset">Reset</button>
+          </div>
+
+          <p class="catatan" id="woPeringatan">
+            Hentikan latihan jika terasa nyeri dada, pusing, atau sesak napas.
+            Konsultasikan dengan dokter bila punya kondisi medis tertentu.
           </p>
-          <span class="placeholder__chip">Segera hadir</span>
-          <button
-            class="tombol tombol--garis"
-            type="button"
-            data-tab="kalkulator"
-          >
-            ← Kembali ke Kalkulator
-          </button>
+        </section>
+
+        <!-- Dialog catat latihan (bottom sheet) -->
+        <div class="wo__dialog" id="woDialog" hidden>
+          <div class="wo__dialogKotak" role="dialog" aria-modal="true"
+            aria-labelledby="woDialogJudul">
+            <div class="wo__dialogKepala">
+              <h3 class="kartu__judul" id="woDialogJudul">Catat Latihan</h3>
+              <button class="wo__dialogTutup" type="button" id="woTutupDialog"
+                aria-label="Tutup dialog">✕</button>
+            </div>
+
+            <input class="wo__cari" id="woCari" type="search"
+              placeholder="Cari latihan… (jalan, squat, yoga)" autocomplete="off"
+              aria-label="Cari latihan">
+            <div class="wo__hasil" id="woHasil"></div>
+
+            <div class="wo__porsi">
+              <span class="wo__porsiLabel" id="woPorsiLatihan">Pilih latihan dulu</span>
+              <div class="wo__porsiKendali">
+                <button class="wo__porsiTombol" type="button" id="woMenitKurang"
+                  aria-label="Kurangi 5 menit">−</button>
+                <span class="wo__porsiNilai" id="woMenitNilai">20</span>
+                <span class="wo__porsiSatuan">menit</span>
+                <button class="wo__porsiTombol" type="button" id="woMenitTambah"
+                  aria-label="Tambah 5 menit">+</button>
+              </div>
+            </div>
+
+            <label class="wo__manualBaris">
+              <input type="checkbox" id="woManualCek">
+              Timpa kalori secara manual
+            </label>
+            <input class="wo__cari" id="woManualAngka" type="number" min="1" max="5000"
+              placeholder="kalori manual (kkal)" hidden aria-label="Kalori manual">
+
+            <p class="wo__preview" id="woPreviewKkal">Pilih latihan dulu.</p>
+            <button class="tombol tombol--utama" type="button" id="woSimpanEntri" disabled>
+              Simpan
+            </button>
+            <p class="catatan">
+              Kalori dihitung dari MET × berat tubuh dari profil (bawaan 60 kg),
+              dan boleh ditimpa manual.
+            </p>
+          </div>
         </div>
       </main>
 
