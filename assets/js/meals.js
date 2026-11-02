@@ -5,19 +5,31 @@
    Penyimpanan lewat storage.js; target dari profil via nutrition.js.
    ========================================================================== */
 
-import { FOODS, SLOT_MAKAN } from './data.js';
+import {
+  buatRencanaMingguan,
+  daftarBelanjaDariRencana,
+  FOODS,
+  RESEP,
+  SLOT_MAKAN,
+} from './data.js';
 import { hitungTargetKalori, RASIO_MAKRO_DEFAULT } from './nutrition.js';
 import { formatDesimal, formatRibuan, toast, toastAksi } from './ui.js';
 import {
   catatMakananDipakai,
+  muatCentangBelanja,
   muatFavorit,
   muatLogMakan,
+  muatLogOlahraga,
   muatMakananKustom,
   muatMakananTerbaru,
   muatProfil,
+  muatSeedRencana,
+  bersihkanCentangBelanja,
   simpanLogMakan,
+  simpanSeedRencana,
   tambahMakananKustom,
   tanggalHariIni,
+  ubahCentangBelanja,
   ubahFavorit,
 } from './storage.js';
 
@@ -247,6 +259,18 @@ function renderRingkasan() {
     sisaEl.textContent = sisa >= 0
       ? `Sisa ${formatRibuan(sisa)} kkal lagi hari ini`
       : `Melebihi target ${formatRibuan(Math.abs(sisa))} kkal`;
+  }
+
+  // Informasi kalori terbakar dari log olahraga tanggal ini (tugas 3.11).
+  // Hanya informasi — tidak otomatis menambah jatah makan.
+  const bakarEl = ambil('mealBakarTeks');
+  if (bakarEl) {
+    const kkalBakar = Math.round(muatLogOlahraga(state.tanggal)
+      .reduce((jumlah, entri) => jumlah + (Number(entri.kcal) || 0), 0));
+    bakarEl.hidden = kkalBakar <= 0;
+    bakarEl.textContent = kkalBakar > 0
+      ? `🔥 Dibakar olahraga: ± ${formatRibuan(kkalBakar)} kkal`
+      : '';
   }
 }
 
@@ -638,10 +662,175 @@ function kustomMakananBaru(event) {
 }
 
 /* --------------------------------------------------------------------------
+   Rencana mingguan (2.11), daftar belanja (2.12), resep (2.13)
+   -------------------------------------------------------------------------- */
+
+/** Rencana minggu aktif dari target & seed tersimpan. */
+function rencanaAktif() {
+  const target = infoTarget();
+  return buatRencanaMingguan(target.target, muatSeedRencana(), tanggalHariIni());
+}
+
+function renderRencana() {
+  const wadahHari = ambil('mealRencanaHari');
+  const ketEl = ambil('mealRencanaKet');
+  if (!wadahHari) return;
+
+  const target = infoTarget();
+  const rencana = buatRencanaMingguan(target.target, muatSeedRencana(), tanggalHariIni());
+
+  if (ketEl) {
+    const singkat = (t) => {
+      const [y, m, d] = t.split('-').map(Number);
+      return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short' })
+        .format(new Date(y, m - 1, d));
+    };
+    ketEl.textContent =
+      `Saran menu ± ${formatRibuan(target.target)} kkal/hari · ` +
+      `${singkat(rencana.hari[0].tanggal)} – ${singkat(rencana.hari[6].tanggal)}`;
+  }
+
+  // Jaga <details> yang sedang terbuka saat re-render.
+  const terbuka = new Set(
+    [...wadahHari.querySelectorAll('details[open]')].map((d) => d.dataset.hari));
+
+  wadahHari.replaceChildren();
+  for (const hari of rencana.hari) {
+    const hariIni = hari.tanggal === tanggalHariIni();
+
+    const detail = elemen('details', 'meal__rencanaItem');
+    detail.dataset.hari = hari.tanggal;
+    if (hariIni || terbuka.has(hari.tanggal)) detail.open = true;
+
+    const kepala = elemen('summary', 'meal__rencanaKepala');
+    kepala.appendChild(elemen('span', 'meal__rencanaHariLabel',
+      hariIni ? `${hari.label} · hari ini` : hari.label));
+    kepala.appendChild(elemen('span', 'meal__rencanaHariTotal',
+      `± ${formatRibuan(hari.total)} kkal`));
+    detail.appendChild(kepala);
+
+    const isi = elemen('div', 'meal__rencanaIsi');
+    for (const kunciSlot of Object.keys(SLOT_MAKAN)) {
+      const baris = elemen('div', 'meal__rencanaSlot');
+      baris.appendChild(elemen('span', 'meal__rencanaNama', SLOT_MAKAN[kunciSlot]));
+      const teks = hari.slot[kunciSlot]
+        .map((item) => {
+          const makanan = FOODS.find((m) => m.id === item.foodId);
+          return makanan
+            ? `${makanan.name} × ${formatDesimal(item.servings)}`
+            : '';
+        })
+        .filter(Boolean)
+        .join(', ');
+      baris.appendChild(elemen('span', 'meal__rencanaTeks', teks));
+      isi.appendChild(baris);
+    }
+    detail.appendChild(isi);
+    wadahHari.appendChild(detail);
+  }
+}
+
+/** Acak ulang menu: seed baru + kosongkan checklist belanja. */
+function acakUlangRencana() {
+  simpanSeedRencana(Math.floor(Math.random() * 1e9) + 1);
+  bersihkanCentangBelanja();
+  renderRencana();
+  renderBelanja();
+  toast('Menu baru siap. Checklist belanja dikosongkan.');
+}
+
+/* --- Daftar belanja -------------------------------------------------------- */
+
+function renderBelanja() {
+  const daftarEl = ambil('mealBelanjaDaftar');
+  const sisaEl = ambil('mealBelanjaSisa');
+  if (!daftarEl) return;
+
+  const belanja = daftarBelanjaDariRencana(rencanaAktif());
+  const centang = new Set(muatCentangBelanja());
+  daftarEl.replaceChildren();
+
+  let sudahBeli = 0;
+  for (const item of belanja) {
+    const cek = document.createElement('input');
+    cek.type = 'checkbox';
+    cek.className = 'meal__belanjaCek';
+    cek.id = `belanja-${item.id}`;
+    cek.checked = centang.has(item.id);
+    cek.dataset.belanjaId = item.id;
+    cek.setAttribute('aria-label', `Tandai ${item.name} sudah dibeli`);
+    if (cek.checked) sudahBeli++;
+
+    const teks = elemen('label', 'meal__belanjaTeks');
+    teks.htmlFor = cek.id;
+    teks.appendChild(elemen('span', 'meal__belanjaNama', item.name));
+    teks.appendChild(elemen('span', 'meal__belanjaKet',
+      `${formatDesimal(item.servings)} porsi · dipakai ${item.hari} hari`));
+
+    const baris = elemen('li', 'meal__belanjaBaris');
+    baris.appendChild(cek);
+    baris.appendChild(teks);
+    daftarEl.appendChild(baris);
+  }
+
+  if (sisaEl) sisaEl.textContent = belanja.length
+    ? `${sudahBeli}/${belanja.length} dibeli`
+    : 'Masih kosong';
+  daftarEl.hidden = belanja.length === 0;
+}
+
+/* --- Resep sederhana --------------------------------------------------------- */
+
+/** Resep dirender sekali (detail buka-tutup bawaan <details>). */
+function renderResep() {
+  const wadah = ambil('mealResepDaftar');
+  if (!wadah || wadah.childElementCount > 0) return;
+
+  for (const resep of RESEP) {
+    const detail = elemen('details', 'meal__resepItem');
+
+    const kepala = elemen('summary', 'meal__resepKepala');
+    kepala.appendChild(elemen('span', 'meal__resepNama', resep.name));
+    kepala.appendChild(elemen('span', 'meal__resepKet',
+      `${resep.porsi} · ± ${formatRibuan(resep.kcal)} kkal/porsi`));
+    detail.appendChild(kepala);
+
+    const isi = elemen('div', 'meal__resepIsi');
+
+    const jBahan = elemen('h3', 'meal__resepJudulKecil', 'Bahan');
+    const daftarBahan = elemen('ul', 'meal__resepBahan');
+    for (const bahan of resep.bahan) {
+      daftarBahan.appendChild(elemen('li', '', bahan));
+    }
+    isi.appendChild(jBahan);
+    isi.appendChild(daftarBahan);
+
+    const jLangkah = elemen('h3', 'meal__resepJudulKecil', 'Cara membuat');
+    const daftarLangkah = elemen('ol', 'meal__resepLangkah');
+    for (const langkah of resep.langkah) {
+      daftarLangkah.appendChild(elemen('li', '', langkah));
+    }
+    isi.appendChild(jLangkah);
+    isi.appendChild(daftarLangkah);
+
+    detail.appendChild(isi);
+    wadah.appendChild(detail);
+  }
+}
+
+/* --------------------------------------------------------------------------
    Event delegasi dialog & slot
    -------------------------------------------------------------------------- */
 
 function pasangEvent() {
+  // Rencana: acak ulang + centang belanja (delegasi)
+  ambil('btnAcakRencana')?.addEventListener('click', acakUlangRencana);
+  ambil('mealBelanjaDaftar')?.addEventListener('change', (event) => {
+    const cek = event.target.closest('[data-belanja-id]');
+    if (cek) ubahCentangBelanja(cek.dataset.belanjaId, cek.checked);
+    renderBelanja();
+  });
+
   // Navigasi tanggal
   ambil('btnHariSebelum')?.addEventListener('click', () => geserHari(-1));
   ambil('btnHariBerikut')?.addEventListener('click', () => geserHari(1));
@@ -723,6 +912,9 @@ function renderSemua() {
   renderRingkasan();
   renderNavigasiTanggal();
   renderSlotSemua();
+  renderRencana();
+  renderBelanja();
+  renderResep();
 }
 
 /**

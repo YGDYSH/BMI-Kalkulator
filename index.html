@@ -487,6 +487,12 @@
             <div class="meal__ring" id="mealRing"></div>
             <div class="meal__ringInfo">
               <p class="meal__sisaTeks" id="mealSisaTeks" aria-live="polite"></p>
+              <p
+                class="meal__bakarTeks"
+                id="mealBakarTeks"
+                hidden
+                title="Dihitung dari catatan olahraga tanggal ini"
+              ></p>
               <button
                 class="meal__tautan"
                 type="button"
@@ -591,6 +597,50 @@
           >
             + Tambah makanan
           </button>
+        </section>
+
+        <!-- Rencana mingguan (tugas 2.11) -->
+        <section class="kartu" aria-labelledby="mealRencanaJudul">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="mealRencanaJudul">Rencana Minggu Ini</h2>
+            <button
+              class="tombol tombol--garis tombol--kecil"
+              id="btnAcakRencana"
+              type="button"
+            >
+              🎲 Acak ulang
+            </button>
+          </div>
+          <p class="meal__ket" id="mealRencanaKet"></p>
+          <div class="meal__rencanaHari" id="mealRencanaHari"></div>
+          <p class="catatan">
+            Nilai gizi bersifat perkiraan. Tuliskan pilihanmu lewat tombol
+            "+ Tambah makanan" di slot di atas agar terhitung.
+          </p>
+        </section>
+
+        <!-- Daftar belanja otomatis (tugas 2.12) -->
+        <section class="kartu" aria-labelledby="mealBelanjaJudul">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="mealBelanjaJudul">Daftar Belanja</h2>
+            <span class="lencana" id="mealBelanjaSisa"></span>
+          </div>
+          <p class="meal__ket">
+            Dihitung otomatis dari rencana minggu ini. Centang yang sudah
+            dibeli — checklist tersimpan di perangkatmu.
+          </p>
+          <ul class="meal__belanja" id="mealBelanjaDaftar"></ul>
+        </section>
+
+        <!-- Resep sederhana (tugas 2.13) -->
+        <section class="kartu" aria-labelledby="mealResepJudul">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="mealResepJudul">Resep Sederhana</h2>
+          </div>
+          <p class="meal__ket">
+            Resep bahan terjangkau; kalori per porsi bersifat perkiraan.
+          </p>
+          <div class="meal__resep" id="mealResepDaftar"></div>
         </section>
 
         <!-- Dialog tambah makanan -->

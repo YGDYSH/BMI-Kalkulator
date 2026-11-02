@@ -215,6 +215,243 @@ export const SLOT_MAKAN = {
 };
 
 /**
+ * Kolom pembagian kalori per slot dari total harian (tugas 2.11).
+ * `tag` = tag FOODS yang boleh dipilih; `bagian` = porsi kalori slot.
+ */
+const STRUKTUR_SLOT = {
+  breakfast: [
+    { tag: 'pokok', bagian: 0.75 },
+    { tag: 'minuman', bagian: 0.25 },
+  ],
+  lunch: [
+    { tag: 'pokok', bagian: 0.5 },
+    { tag: 'lauk', bagian: 0.3 },
+    { tag: 'sayur', bagian: 0.2 },
+  ],
+  dinner: [
+    { tag: 'pokok', bagian: 0.6 },
+    { tag: 'lauk', bagian: 0.4 },
+  ],
+  snack: [{ tag: 'buah', bagian: 1 }],
+};
+
+/** PRNG deterministik (mulberry32) supaya rencana stabil per seed. */
+function bilAcak(seed) {
+  let t = seed >>> 0;
+  return function next() {
+    t += 0x6d2b79f5;
+    let a = t;
+    a = Math.imul(a ^ (a >>> 15), a | 1);
+    a ^= a + Math.imul(a ^ (a >>> 7), a | 61);
+    return ((a ^ (a >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const NAMA_HARI = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+
+/** Ambil tanggalhari (YYYY-MM-DD) Senin pada minggu berisi tanggal hari itu. */
+function seninDari(tanggalHari) {
+  const [y, m, d] = (tanggalHari || '').split('-').map(Number);
+  const dasar = Number.isFinite(y) && Number.isFinite(m) && Number.isFinite(d)
+    ? new Date(y, m - 1, d)
+    : new Date();
+  const geser = (dasar.getDay() + 6) % 7; // Senin = 0
+  dasar.setDate(dasar.getDate() - geser);
+  const dua = (n) => String(n).padStart(2, '0');
+  return `${dasar.getFullYear()}-${dua(dasar.getMonth() + 1)}-${dua(dasar.getDate())}`;
+}
+
+/** Tanggal berikutnya dari string YYYY-MM-DD. */
+function tanggalBerikutnya(tanggal) {
+  const [y, m, d] = tanggal.split('-').map(Number);
+  const tgl = new Date(y, m - 1, d);
+  tgl.setDate(tgl.getDate() + 1);
+  const dua = (n) => String(n).padStart(2, '0');
+  return `${tgl.getFullYear()}-${dua(tgl.getMonth() + 1)}-${dua(tgl.getDate())}`;
+}
+
+/** Porsi kelipatan 0,5 dalam rentang 0,5–2 sesuai target kkal. */
+function porsiTarget(targetKkal, kcalPerPorsi) {
+  if (!(kcalPerPorsi > 0)) return 1;
+  const mentah = Math.round(((targetKkal / kcalPerPorsi) * 2) / 1) / 2;
+  return Math.min(2, Math.max(0.5, mentah));
+}
+
+/**
+ * Saran menu 7 hari (Senin–Minggu) dibangun dari FOODS sesuai target kalori
+ * (tugas 2.11). Deterministik: seed sama -> rencana sama. Fungsi murni.
+ * @param {number} targetKkal target kalori harian (mis. dari profil)
+ * @param {number} seed angka acak tersimpan untuk variasi menu
+ * @param {string} tanggalHari tanggal referensi YYYY-MM-DD (bawaan: hari ini)
+ * @returns {{ hariIni: string, hari: Array }} 7 baris {tanggal, label, slot, total}
+ */
+export function buatRencanaMingguan(targetKkal, seed = 1, tanggalHari = '') {
+  const target = Math.min(3500, Math.max(1200, Math.round(Number(targetKkal) || 2000)));
+  const acak = bilAcak((Math.floor(Number(seed)) || 1) + 7);
+  const mulai = tanggalHari ? seninDari(tanggalHari) : seninDari();
+
+  const hasil = [];
+  let tanggal = mulai;
+
+  for (let d = 0; d < 7; d++) {
+    const slot = {};
+    const terpakai = new Set(); // hindari makanan sama dua kali dalam satu hari
+    let total = 0;
+
+    for (const kunciSlot of Object.keys(STRUKTUR_SLOT)) {
+      let komposisi = STRUKTUR_SLOT[kunciSlot];
+      if (kunciSlot === 'snack' && d % 2 === 1) {
+        komposisi = [{ tag: 'camilan', bagian: 1 }];
+      }
+      const targetSlot = target * FRaksi_SLOT[kunciSlot];
+      slot[kunciSlot] = komposisi.map((kolom, i) => {
+        const pool = FOODS.filter((m) => m.tags.includes(kolom.tag));
+        // Pilih acak; bila id sudah terpakai hari itu, geser satu (terbatas).
+        let indeks = Math.floor(acak() * pool.length) % pool.length;
+        for (let coba = 0; coba < pool.length && terpakai.has(pool[indeks].id); coba++) {
+          indeks = (indeks + 1) % pool.length;
+        }
+        const makanan = pool[indeks];
+        const share = targetSlot * shareBagian(komposisi, i);
+        const servings = porsiTarget(share, makanan.kcal);
+        terpakai.add(makanan.id);
+        const kkal = Math.round(makanan.kcal * servings);
+        total += kkal;
+        return { foodId: makanan.id, servings, kkal };
+      });
+    }
+
+    hasil.push({
+      tanggal,
+      label: NAMA_HARI[d],
+      slot,
+      total: Math.round(total),
+    });
+    tanggal = tanggalBerikutnya(tanggal);
+  }
+
+  return { hariIni: mulai, hari: hasil };
+}
+
+/** Fraksi kalori harian yang diambil tiap slot (0,25+0,4+0,25+0,1 = 1). */
+const FRaksi_SLOT = {
+  breakfast: 0.25,
+  lunch: 0.4,
+  dinner: 0.25,
+  snack: 0.1,
+};
+
+/** Bagian kalori milik kolom i (dinormalisasi di dalam slotnya). */
+function shareBagian(komposisi, i) {
+  const total = komposisi.reduce((jumlah, k) => jumlah + k.bagian, 0);
+  return komposisi[i].bagian / total;
+}
+
+/**
+ * Daftar belanja otomatis dari rencana mingguan (tugas 2.12): agregasi
+ * foodId -> total porsi. Terurut abjad; hanya memakai data rencana.
+ */
+export function daftarBelanjaDariRencana(rencana) {
+  const peta = new Map();
+  for (const hari of rencana.hari) {
+    for (const entri of Object.values(hari.slot)) {
+      for (const item of entri) {
+        const makanan = FOODS.find((m) => m.id === item.foodId);
+        if (!makanan) continue;
+        const ada = peta.get(item.foodId)
+          || { id: item.foodId, name: makanan.name, servings: 0, hari: 0 };
+        ada.servings += item.servings;
+        ada.hari += 1;
+        peta.set(item.foodId, ada);
+      }
+    }
+  }
+  return [...peta.values()]
+    .map((item) => ({ ...item, servings: Math.round(item.servings * 10) / 10 }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'id'));
+}
+
+/**
+ * Resep sederhana bahan terjangkau (tugas 2.13) — ditampilkan di halaman
+ * Pola Makan. `kcal` = kalori per porsi, bersifat perkiraan.
+ */
+export const RESEP = [
+  {
+    id: 'oat-pisang',
+    name: 'Oat pisang hangat',
+    porsi: '1 porsi',
+    kcal: 220,
+    bahan: ['1 mangkuk oat', '1 buah pisang', '200 ml air/susu', 'Secukupnya kayu manis'],
+    langkah: [
+      'Masak oat dengan air/susu di api kecil ± 5 menit.',
+      'Iris pisang, aduk ke dalam oat.',
+      'Tambahkan taburan kayu manis, sajikan hangat.',
+    ],
+  },
+  {
+    id: 'tempe-kecap',
+    name: 'Tempe kecap sayur',
+    porsi: '2 porsi',
+    kcal: 160,
+    bahan: ['200 g tempe', '2 sdm kecap manis', '2 siung bawang putih', '2 sdm air', '1 sdm minyak'],
+    langkah: [
+      'Iris tempe persegi, tumis bersama bawang putih cincang dengan sedikit minyak.',
+      'Masukkan kecap manis dan air, masak sampai bumbu meresap.',
+      'Tambahkan sayur rebus di samping sebagai lauk pendamping.',
+    ],
+  },
+  {
+    id: 'sup-telur-bayam',
+    name: 'Sup telur bayam',
+    porsi: '2 porsi',
+    kcal: 120,
+    bahan: ['2 butir telur', '1 ikat kecil bayam', '1 siung bawang putih', '500 ml air', 'Garam & lada sejumlah kecil'],
+    langkah: [
+      'Tumis bawang putih, tuang air sampai mendidih.',
+      'Masukkan bayam, masak ± 2 menit.',
+      'Kocok telur, aduk pelan ke dalam sup sampai matang.',
+      'Beri garam dan secukup lada.',
+    ],
+  },
+  {
+    id: 'telur-dadar-sayur',
+    name: 'Telur dadar sayur',
+    porsi: '2 porsi',
+    kcal: 150,
+    bahan: ['2 butir telur', '1 genggam wortel parut', '1 genggam kol cincang', 'Garam & lada sejumlah kecil', '1 sdm minyak'],
+    langkah: [
+      'Kocok telur bersama wortel, kol, garam, dan lada.',
+      'Panaskan minyak di wajan kecil, tuang adonan.',
+      'Matang perlahan (dua sisi) ± 5 menit, potong dua.',
+    ],
+  },
+  {
+    id: 'bubur-kacang-hijau-mudah',
+    name: 'Bubur kacang hijau sederhana',
+    porsi: '3 porsi',
+    kcal: 180,
+    bahan: ['200 g kacang hijau', '500 ml air', '1 lembar daun pandan', '2 sdm gula pila/gula pasir'],
+    langkah: [
+      'Rendam kacang hijau ± 1 jam, lanjut masak dengan air & pandan sampai lembek.',
+      'Tambahkan gula, aduk sampai larut.',
+      'Sajikan hangat, 1 mangkuk = 1 porsi.',
+    ],
+  },
+  {
+    id: 'ikan-kembung-bakar',
+    name: 'Ikan kembung bakar sederhana',
+    porsi: '2 porsi',
+    kcal: 200,
+    bahan: ['2 ekor ikan kembung', 'Air perasan jeruk nipis', 'Garam & lada sejumlah kecil'],
+    langkah: [
+      'Bersihkan ikan, lumuri jeruk nipis, garam, dan lada.',
+      'Biarkan ± 15 menit sampai bumbu meresap.',
+      'Panggang/tumis wajan tanpa banyak minyak sampai matang dua sisi.',
+    ],
+  },
+];
+
+/**
  * Katalog latihan (Fase 3): kardio, kekuatan, peregangan. `met` adalah nilai
  * rata-rata Compendium of Physical Activities untuk orang dewasa umum.
  * `steps` = langkah gerakan 3-5 poin; `tips` = catatan keselamatan.

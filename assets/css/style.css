@@ -1881,6 +1881,213 @@ button {
   gap: var(--sp-3);
 }
 
+/* --- Info kalori terbakar dari olahraga (3.11) ------------------------------ */
+
+.meal__bakarTeks {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--c-lebih-teks);
+}
+
+/* --- Ket umum (rencana/belanja/resep) -------------------------------------- */
+
+.meal__ket {
+  font-size: 0.82rem;
+  color: var(--c-teks-redup);
+  line-height: 1.5;
+}
+
+/* --- Rencana mingguan (2.11) ------------------------------------------------ */
+
+.meal__rencanaHari {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+}
+
+.meal__rencanaItem {
+  border: 1.5px solid var(--c-garis);
+  border-radius: var(--r-sedang);
+  background: var(--c-kartu-lembut);
+  overflow: hidden;
+}
+
+.meal__rencanaKepala {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  min-height: 48px;
+  padding: var(--sp-2) var(--sp-3);
+  list-style: none;
+  cursor: pointer;
+}
+
+.meal__rencanaKepala::-webkit-details-marker {
+  display: none;
+}
+
+.meal__rencanaHariLabel {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: var(--c-teks);
+}
+
+.meal__rencanaHariTotal {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--c-utama-tua);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.meal__rencanaIsi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border-top: 1px solid var(--c-garis);
+}
+
+.meal__rencanaSlot {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.meal__rencanaNama {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--c-teks-mati);
+}
+
+.meal__rencanaTeks {
+  font-size: 0.82rem;
+  color: var(--c-teks);
+  line-height: 1.5;
+}
+
+/* --- Daftar belanja (2.12) -------------------------------------------------- */
+
+.meal__belanja {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-top: var(--sp-3);
+}
+
+.meal__belanja[hidden] {
+  display: none;
+}
+
+.meal__belanjaBaris {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--r-kecil);
+  background: var(--c-latar-2);
+}
+
+.meal__belanjaCek {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  accent-color: var(--c-utama);
+  cursor: pointer;
+}
+
+.meal__belanjaTeks {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.meal__belanjaNama {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--c-teks);
+}
+
+.meal__belanjaKet {
+  font-size: 0.72rem;
+  color: var(--c-teks-mati);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Resep sederhana (2.13) ------------------------------------------------- */
+
+.meal__resep {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+}
+
+.meal__resepItem {
+  border: 1.5px solid var(--c-garis);
+  border-radius: var(--r-sedang);
+  background: var(--c-kartu-lembut);
+  overflow: hidden;
+}
+
+.meal__resepKepala {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-height: 48px;
+  padding: var(--sp-2) var(--sp-3);
+  justify-content: center;
+  list-style: none;
+  cursor: pointer;
+}
+
+.meal__resepKepala::-webkit-details-marker {
+  display: none;
+}
+
+.meal__resepNama {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--c-teks);
+}
+
+.meal__resepKet {
+  font-size: 0.74rem;
+  color: var(--c-teks-mati);
+  font-variant-numeric: tabular-nums;
+}
+
+.meal__resepIsi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border-top: 1px solid var(--c-garis);
+}
+
+.meal__resepJudulKecil {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--c-teks-mati);
+}
+
+.meal__resepBahan,
+.meal__resepLangkah {
+  margin-left: 18px;
+  font-size: 0.84rem;
+  color: var(--c-teks);
+  line-height: 1.55;
+}
+
 /* ==========================================================================
    21. Halaman Olahraga (wo-*)
    ========================================================================== */

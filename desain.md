@@ -207,9 +207,9 @@ Fokus: **pencatat asupan harian** terhadap target kalori, bukan sekadar jadwal.
 - [x] **2.8** **Favorit:** tombol bintang pada makanan, tersimpan di `favFoods`.
 - [x] **2.9** **Makanan kustom:** pengguna dapat menambah makanan sendiri (nama, kkal, makro opsional) dan disimpan terpisah.
 - [x] **2.10** Tanpa profil: tampilkan ajakan "Lengkapi profil untuk melihat targetmu" dengan tautan ke tab Akun, tetapi pencatatan tetap bisa dipakai dengan target bawaan 2000 kkal.
-- [ ] **2.11** _(Lanjutan)_ **Jadwal mingguan:** saran menu 7 hari berdasarkan target kalori, dibuat dari `FOODS`.
-- [ ] **2.12** _(Lanjutan)_ **Daftar belanja** otomatis dari jadwal mingguan, dengan checklist yang tersimpan.
-- [ ] **2.13** _(Lanjutan)_ **Resep sederhana:** bahan terjangkau, langkah, kalori per porsi.
+- [x] **2.11** _(Lanjutan)_ **Jadwal mingguan:** saran menu 7 hari berdasarkan target kalori, dibuat dari `FOODS`.
+- [x] **2.12** _(Lanjutan)_ **Daftar belanja** otomatis dari jadwal mingguan, dengan checklist yang tersimpan.
+- [x] **2.13** _(Lanjutan)_ **Resep sederhana:** bahan terjangkau, langkah, kalori per porsi.
 
 Tugas 2.1–2.10 adalah inti. Tugas 2.11–2.13 hanya dikerjakan setelah inti stabil.
 
@@ -235,7 +235,7 @@ Tugas 2.1–2.10 adalah inti. Tugas 2.11–2.13 hanya dikerjakan setelah inti st
 - [x] **3.8** **Timer latihan:** interval kerja/istirahat yang dapat diatur, dengan getar (`navigator.vibrate`) dan/atau bunyi singkat pada pergantian. Timer harus tetap akurat meski layar mati sebentar (hitung dari timestamp, bukan dari hitungan `setInterval`).
 - [x] **3.9** **Riwayat:** daftar aktivitas per hari, dengan hapus entri.
 - [x] **3.10** Tambahkan peringatan kesehatan singkat: "Hentikan latihan jika terasa nyeri dada, pusing, atau sesak. Konsultasikan dengan dokter bila punya kondisi medis."
-- [ ] **3.11** _(Lanjutan)_ Hubungkan kalori olahraga ke halaman Pola Makan sebagai informasi "kalori terbakar hari ini" (tampilkan saja, **jangan** otomatis menambah jatah makan).
+- [x] **3.11** _(Lanjutan)_ Hubungkan kalori olahraga ke halaman Pola Makan sebagai informasi "kalori terbakar hari ini" (tampilkan saja, **jangan** otomatis menambah jatah makan).
 
 **Kriteria selesai:**
 
@@ -345,5 +345,14 @@ Sebelum menandai fase selesai:
   - **3.8:** timer menghitung sisa fase dari `Date.now() - mulaiEpoch` (bukan penghitungan interval), sehingga tetap akurat saat tab dipindah; interval 500 ms hanya untuk tampilan. Pergantian fase memakai `navigator.vibrate` + bip pendek WebAudio (guard tanpa dukungan).
   - **3.9:** riwayat list per tanggal dengan navigasi hari (prefix `woHari*`), hapus + urungkan memakai `toastAksi`.
   - **3.10:** peringatan kesehatan jeda tampil di kartu timer (`#woPeringatan`).
-  - `sw.js`: `workout.js` masuk app shell, cache naik ke `nutrikala-shell-v5`.
-  - Uji node: MET (264/100/90 kkal, invalid → null), Senin- sebagai awal minggu (4 kasus), log per tanggal, validasi entri jelek, streak (3/3/0) semua `OK`; `node --check` 11 modul `OK`. Perlu verifikasi manual timer di browser + Lighthouse di Fase 4.
+   - `sw.js`: `workout.js` masuk app shell, cache naik ke `nutrikala-shell-v5`.
+   - Uji node: MET (264/100/90 kkal, invalid → null), Senin- sebagai awal minggu (4 kasus), log per tanggal, validasi entri jelek, streak (3/3/0) semua `OK`; `node --check` 11 modul `OK`. Perlu verifikasi manual timer di browser + Lighthouse di Fase 4.
+
+- **2 Nov 2026 — Fase 2 lanjutan (2.11–2.13) + Fase 3 lanjutan (3.11).**
+  - **2.11:** generator `buatRencanaMingguan(targetKkal, seed, tanggalHari)` dibuat di `data.js` sebagai fungsi murni (dekat `acakMenu`, tanpa import — tetap bisa diuji node). Deterministik via PRNG mulberry32: seed sama → menu sama, jadi rencana tidak berubah sendiri saat reload. Minggu = Senin–Minggu (peraturan sama dengan streak di workout). Slot dibagi 25/40/25/10% (sarapan/siang/malam/camilan) di dalam `FRaksi_SLOT`; komposisi per slot dari tag `FOODS` (pokok/lauk/sayur/buah/camilan/minuman); porsi kelipatan 0,5 dibatasi 0,5–2; makanan yang sama tidak muncul dua kali dalam satu hari. Camilan hari ganjil diganti pool `camilan` untuk variasi. UI: `<details>` per hari (hari ini terbuka bawaan; status buka dijaga saat re-render) di kartu "Rencana Minggu Ini" + tombol "🎲 Acak ulang".
+  - **2.12:** daftar belanja = agregasi porsi per foodId dari rencana (`daftarBelanjaDariRencana` di `data.js`, urut abjad). Karena `FOODS` adalah hidangan (bukan bahan mentah), daftar belanja berupa jumlah porsi hidangan per minggu — disimpulkan & dicatat di sini sebagai interpretasi "bahan". Checklist tersimpan di kunci baru `nutrikala:shoppingCheck` (array id, fungsi `muat/ubah/bersihkanCentangBelanja` di `storage.js`); mengacak ulang menu mengosongkan checklist (EU toast). Centang tidak menghilangkan saat re-render karena dibaca ulang dari storage.
+  - **2.13:** `RESEP` (6 resep, bahan terjangkau, langkah, `kcal` per porsi) ditambahkan di `data.js` urut abjad; dirender sebagai `<details>` sekali per muat (`renderResep` guard `childElementCount`) supaya status buka tidak ikut lepas ketika entri dicatat.
+  - **3.11:** baris "🔥 Dibakar olahraga: ± X kkal" (`#mealBakarTeks`) di kartu ringkasan Pola Makan; sumbernya `muatLogOlahraga(state.tanggal)`, mengikuti tanggal yang sedang dipilih & tersembunyi bila 0 kkal. Murni informasi — tidak menambah target/jatah makan.
+  - Kunci baru `nutrikala:mealPlan` (angka seed) + `nutrikala:shoppingCheck` otomatis ikut terekspor/dihapus lewat PREFIKS di `storage.js`.
+  - `sw.js`: tidak ada berkas baru, cache naik ke `nutrikala-shell-v6` karena index/style/js berubah.
+  - Uji node: `buatRencanaMingguan` (7 hari × 3 seed, lampung porsi kelipatan 0,5 dalam 0,5–2, snack Selasa → camilan, deterministik `JSON.stringify` sama), `daftarBelanjaDariRencana` (37 item + `id`), clamp target 0 → 1200; storage: seed stabil/simpan/validasi, centang tambah-hapus-kosong — semua `OK`; `node --check` 11 modul `OK`. Verifikasi manual di `http://localhost/Bmi-Calc/` (rencana, belanja, resep, info bakar, BMI/hidrasi tetap jalan, offline) belum dilakukan.

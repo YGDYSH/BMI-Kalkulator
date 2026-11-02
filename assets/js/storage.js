@@ -20,6 +20,8 @@ const KEY = {
   favorit: 'nutrikala:favFoods',
   terbaru: 'nutrikala:recentFoods',
   kustom: 'nutrikala:foodKustom',
+  rencana: 'nutrikala:mealPlan',
+  belanja: 'nutrikala:shoppingCheck',
 };
 
 /** Prefiks semua kunci milik NutriKala (untuk ekspor/hapus total). */
@@ -621,4 +623,47 @@ export function tambahMakananKustom(makanan) {
   const daftar = muatMakananKustom();
   daftar.push(bersih);
   return amanSimpan(KEY.kustom, daftar.slice(-MAKS_KUSTOM)) ? bersih : null;
+}
+
+/* --------------------------------------------------------------------------
+   Rencana menu mingguan & checklist belanja (tugas 2.11 / 2.12)
+   Isi rencana dihitung dari FOODS (data.js); di sini hanya seed & centangan.
+   -------------------------------------------------------------------------- */
+
+/** Seed rencana; dibuat sekali dan dipakai ulang agar menu stabil. */
+export function muatSeedRencana() {
+  const angka = Number(amanAmbil(KEY.rencana));
+  if (Number.isFinite(angka) && angka > 0) return Math.floor(angka);
+  const baru = Math.floor(Math.random() * 1e9) + 1;
+  amanSimpan(KEY.rencana, baru);
+  return baru;
+}
+
+/** Simpan seed baru (tombol "Acak ulang"). */
+export function simpanSeedRencana(seed) {
+  if (!Number.isFinite(Number(seed)) || Number(seed) <= 0) return false;
+  return amanSimpan(KEY.rencana, Math.floor(Number(seed)));
+}
+
+/** Daftar id makanan yang sudah dicentang pada daftar belanja. */
+export function muatCentangBelanja() {
+  const data = amanAmbil(KEY.belanja);
+  if (!Array.isArray(data)) return [];
+  return data.filter((id) => typeof id === 'string');
+}
+
+/** Tambah/hapus centang belanja. Kembalikan daftar terbaru. */
+export function ubahCentangBelanja(id, aktif) {
+  if (typeof id !== 'string') return muatCentangBelanja();
+  const daftar = muatCentangBelanja();
+  const indeks = daftar.indexOf(id);
+  if (aktif && indeks === -1) daftar.push(id);
+  if (!aktif && indeks !== -1) daftar.splice(indeks, 1);
+  amanSimpan(KEY.belanja, daftar);
+  return daftar;
+}
+
+/** Kosongkan checklist belanja (dipakai saat menu diacak ulang). */
+export function bersihkanCentangBelanja() {
+  amanHapus(KEY.belanja);
 }
