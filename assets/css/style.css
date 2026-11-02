@@ -2680,7 +2680,157 @@ button {
 @media (max-width: 350px) {
   .wo__filtGrid,
   .wo__katalogDaftar,
-  .wo__timerAtur {
+  .wo__timerAtur,
+  .beranda__grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* --- Ringkasan hari ini di beranda (4.2) ----------------------------------- */
+
+.beranda__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+
+.beranda__kotak {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sp-3);
+  border-radius: var(--r-sedang);
+  background: var(--c-kartu-lembut);
+}
+
+.beranda__label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--c-teks-redup);
+}
+
+.beranda__nilai {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--c-teks);
+  font-variant-numeric: tabular-nums;
+}
+
+.beranda__ket {
+  font-size: 0.76rem;
+  color: var(--c-teks-mati);
+}
+
+.beranda__tautan {
+  margin-top: var(--sp-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+/* --- Pencapaian / badge (4.3) ---------------------------------------------- */
+
+.profile__badgeDaftar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.profile__badgeItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  border-radius: var(--r-sedang);
+  border: 1.5px dashed var(--c-garis);
+  background: var(--c-kartu-lembut);
+  opacity: 0.75;
+}
+
+.profile__badgeItem--terbuka {
+  border-style: solid;
+  border-color: var(--c-ideal);
+  background: var(--c-ideal-muda);
+  opacity: 1;
+}
+
+.profile__badgeIkon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.profile__badgeTeks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.profile__badgeNama {
+  font-weight: 800;
+  color: var(--c-teks);
+  font-size: 0.92rem;
+}
+
+.profile__badgeKet {
+  font-size: 0.78rem;
+  color: var(--c-teks-redup);
+}
+
+.profile__badgeKeadaan {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--c-teks-mati);
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--c-latar-2);
+}
+
+.profile__badgeKeadaan--terbuka {
+  color: var(--c-ideal-tua);
+  background: var(--c-kartu);
+}
+
+@media (min-width: 460px) {
+  .profile__badgeDaftar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* --- Onboarding (4.5) ------------------------------------------------------- */
+
+.onboard__langkah {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--c-teks-redup);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: var(--sp-3);
+}
+
+.onboard__langkah > .onboard__ikon {
+  font-size: 2.6rem;
+  line-height: 1.2;
+  margin: 0 0 var(--sp-2);
+}
+
+.onboard__langkah > .onboard__teks {
+  margin: 0 0 var(--sp-2);
+  color: var(--c-teks);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.onboard__aksi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+}
+
+.onboard__aksi > .tombol {
+  flex: 1 1 auto;
 }

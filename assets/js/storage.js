@@ -22,6 +22,10 @@ const KEY = {
   kustom: 'nutrikala:foodKustom',
   rencana: 'nutrikala:mealPlan',
   belanja: 'nutrikala:shoppingCheck',
+  pengingat: 'nutrikala:reminders',
+  airRiwayat: 'nutrikala:waterLog',
+  badgeDilihat: 'nutrikala:badgesSeen',
+  onboarding: 'nutrikala:onboarding',
 };
 
 /** Prefiks semua kunci milik NutriKala (untuk ekspor/hapus total). */
@@ -475,6 +479,11 @@ export function muatLogMakan(tanggal) {
     Number.isFinite(Number(item.servings)));
 }
 
+/** Seluruh log makan per tanggal (untuk badge & grafik mingguan). */
+export function muatSemuaLogMakan() {
+  return muatObjekAntarTanggal(KEY.logMakan);
+}
+
 export function simpanLogMakan(tanggal, entri) {
   const data = muatObjekAntarTanggal(KEY.logMakan);
   if (entri.length === 0) {
@@ -666,4 +675,97 @@ export function ubahCentangBelanja(id, aktif) {
 /** Kosongkan checklist belanja (dipakai saat menu diacak ulang). */
 export function bersihkanCentangBelanja() {
   amanHapus(KEY.belanja);
+}
+
+/* --------------------------------------------------------------------------
+   Pengingat harian (nutrikala:reminders) — tugas 4.1
+   { airAktif: bool, makanAktif: bool }
+   -------------------------------------------------------------------------- */
+
+export function muatPengingat() {
+  const data = amanAmbil(KEY.pengingat);
+  return {
+    airAktif: Boolean(data && data.airAktif),
+    makanAktif: Boolean(data && data.makanAktif),
+  };
+}
+
+export function simpanPengingat(pengingat) {
+  const sekarang = muatPengingat();
+  const baru = {
+    airAktif: typeof pengingat.airAktif === 'boolean'
+      ? pengingat.airAktif : sekarang.airAktif,
+    makanAktif: typeof pengingat.makanAktif === 'boolean'
+      ? pengingat.makanAktif : sekarang.makanAktif,
+  };
+  return amanSimpan(KEY.pengingat, baru) ? baru : null;
+}
+
+/* --------------------------------------------------------------------------
+   Jepretan air harian (nutrikala:waterLog) — untuk badge target air (4.3)
+   Array { date, gelas, targetGelas } — satu entri per hari.
+   -------------------------------------------------------------------------- */
+
+export const MAKS_LOG_AIR = 60;
+
+export function muatLogAir() {
+  const data = amanAmbil(KEY.airRiwayat);
+  if (!Array.isArray(data)) return [];
+  return data
+    .filter((entri) => entri && typeof entri.date === 'string')
+    .map((entri) => ({
+      date: entri.date,
+      gelas: Number.isFinite(Number(entri.gelas)) ? Number(entri.gelas) : 0,
+      targetGelas: Number.isFinite(Number(entri.targetGelas))
+        ? Number(entri.targetGelas) : 0,
+    }))
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+    .slice(-MAKS_LOG_AIR);
+}
+
+/** Simpan snapshot air hari ini (timpa bila tanggal sama). */
+export function catatSnapshotAir(gelas, targetGelas) {
+  const hariIni = tanggalHariIni();
+  const isi = Math.max(0, Math.round(Number(gelas) || 0));
+  const target = Math.max(0, Math.round(Number(targetGelas) || 0));
+
+  const log = muatLogAir();
+  const indeks = log.findIndex((entri) => entri.date === hariIni);
+  if (indeks >= 0) {
+    log[indeks] = { date: hariIni, gelas: isi, targetGelas: target };
+  } else {
+    log.push({ date: hariIni, gelas: isi, targetGelas: target });
+  }
+  return amanSimpan(KEY.airRiwayat, log.slice(-MAKS_LOG_AIR));
+}
+
+/* --------------------------------------------------------------------------
+   Pencapaian (badge) & onboarding (tugas 4.3 / 4.5)
+   -------------------------------------------------------------------------- */
+
+/** Daftar id badge yang sudah pernah dilihat pengguna (titik lonceng). */
+export function muatBadgeDilihat() {
+  const data = amanAmbil(KEY.badgeDilihat);
+  if (!Array.isArray(data)) return [];
+  return data.filter((id) => typeof id === 'string');
+}
+
+export function tandaiBadgeDilihat(ids) {
+  const baru = (Array.isArray(ids) ? ids : [])
+    .filter((id) => typeof id === 'string');
+  if (baru.length === 0) return muatBadgeDilihat();
+
+  const lama = muatBadgeDilihat();
+  const gabung = [...new Set([...lama, ...baru])];
+  amanSimpan(KEY.badgeDilihat, gabung);
+  return gabung;
+}
+
+/** True bila onboarding sudah pernah ditampilkan/dituntaskan. */
+export function muatOnboardingDilihat() {
+  return amanAmbil(KEY.onboarding) === true;
+}
+
+export function selesaiOnboarding() {
+  return amanSimpan(KEY.onboarding, true);
 }

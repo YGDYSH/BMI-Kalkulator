@@ -22,27 +22,48 @@ import {
 } from './data.js';
 
 import {
+  DURASI_AKTIVITAS,
+  FOODS,
+  acakMenu,
+  pilihKutipan,
+} from './data.js';
+
+import { hitungTargetKalori } from './nutrition.js';
+
+import {
   muatAirHariIni,
   muatAktivitasHariIni,
+  muatBadgeDilihat,
   muatInputPengguna,
+  muatLogOlahraga,
+  muatMakananKustom,
+  muatOnboardingDilihat,
   muatProfil,
+  muatSemuaLogMakan,
   muatTabAktif,
+  catatSnapshotAir,
+  selesaiOnboarding,
   simpanAktivitas,
   simpanHasilTerakhir,
   simpanInputPengguna,
   simpanTabAktif,
+  tandaiBadgeDilihat,
+  tanggalHariIni,
   catatRiwayatBMI,
+  muatPengaturan,
 } from './storage.js';
 
 import {
   kurangiGelas,
   muatStatusAir,
+  targetGelas,
   tambahGelas,
 } from './hydration.js';
 
-import { renderProfilePage } from './profile.js';
+import { renderProfilePage, hitungPencapaian } from './profile.js';
 import { renderMealsPage } from './meals.js';
 import { renderWorkoutPage } from './workout.js';
+import { mulaiPengingat } from './reminders.js';
 
 import {
   ambil,
@@ -67,6 +88,9 @@ import {
 /** Daftar tab yang valid (digunakan untuk validasi navigasi). */
 const TAB_VALID = ['kalkulator', 'pola-makan', 'olahraga', 'akun'];
 
+/** Target default bila profil belum diisi (sinkron dgn meals.js 2.10). */
+const TARGET_DEFAULT_KKAL = 2000;
+
 /** Status aplikasi (input + turunan yang tidak perlu dihitung ulang). */
 const state = {
   gender: 'pria',
@@ -82,6 +106,8 @@ const state = {
   centangAktivitas: {}, // aktivitas yang dicentang hari ini
   tabAktif: 'kalkulator',
   scrollPerTab: {}, // posisi gulir per tab (hanya di memori)
+  pencapaian: { unlocked: [], baru: [] }, // badge (tugas 4.3)
+  onboardLangkah: 1, // langkah onboarding (tugas 4.5)
 };
 
 /* --------------------------------------------------------------------------
@@ -166,6 +192,8 @@ function terapkanRekomendasi({ acakMenuBaru = false } = {}) {
 function perbaruiAir() {
   state.statusAir = muatStatusAir(state.berat);
   renderAir(state.statusAir);
+  // Jepretan harian untuk badge "target air" (tugas 4.3).
+  catatSnapshotAir(state.statusAir.terisi, state.statusAir.targetGelas);
 }
 
 /** Aksi +1 gelas. */
@@ -178,6 +206,7 @@ function saatTambahAir() {
   } else {
     toast(`Air ditambah. ${state.statusAir.terisi} dari ${state.statusAir.targetGelas} gelas.`);
   }
+  renderBeranda();
 }
 
 /** Aksi undo (-1 gelas). */
@@ -186,6 +215,7 @@ function saatUndoAir() {
   state.statusAir = kurangiGelas(state.berat);
   renderAir(state.statusAir);
   toast(`Gelas dikurangi. ${state.statusAir.terisi} dari ${state.statusAir.targetGelas} gelas.`);
+  renderBeranda();
 }
 
 /* --------------------------------------------------------------------------
@@ -301,6 +331,17 @@ function pindahTab(tab) {
   renderHalaman(tab);
   simpanTabAktif(tab);
 
+  // Ringkasan beranda di segarkan saat kembali ke tab Kalkulator (4.2).
+  if (tab === 'kalkulator') renderBeranda();
+
+  // Badge dianggap "dilihat" saat halaman Akun dibuka (4.3).
+  if (tab === 'akun') {
+    tandaiBadgeDilihat(state.pencapaian.unlocked);
+    state.pencapaian.baru = [];
+    const titik = ambil('headerTitik');
+    if (titik) titik.hidden = true;
+  }
+
   // Kembalikan posisi gulir tab yang dituju (bila pernah dikunjungi).
   const posisi = state.scrollPerTab[tab] || 0;
   window.scrollTo({ top: posisi, left: 0, behavior: 'auto' });
@@ -368,16 +409,168 @@ function pasangTombol() {
   const btnUndoAir = ambil('btnUndoAir');
   if (btnUndoAir) btnUndoAir.addEventListener('click', saatUndoAir);
 
-  const btnNotifikasi = ambil('btnNotifikasi');
-  if (btnNotifikasi) {
-    btnNotifikasi.addEventListener('click', () => {
-      toast('Belum ada kabar baru. Cek lagi nanti ya!');
-    });
-  }
+  // Lonceng & panel pengingat dipasang lewat mulaiPengingat() (reminders.js).
 
   document.querySelectorAll('[data-aktivitas]').forEach((centang) => {
     centang.addEventListener('change', saatCentangAktivitas);
   });
+}
+
+/* --------------------------------------------------------------------------
+   Ringkasan hari ini di beranda (tugas 4.2)
+   -------------------------------------------------------------------------- */
+
+/** Total kkal dari log makan suatu tanggal (FOODS + makanan kustom). */
+function kkalLogHari(tanggal) {
+  const katalog = [...FOODS, ...muatMakananKustom()];
+  const log = muatSemuaLogMakan()[tanggal] || [];
+  let jumlah = 0;
+  for (const entri of log) {
+    const makanan = katalog.find((m) => m.id === entri.foodId);
+    if (makanan) jumlah += makanan.kcal * (Number(entri.servings) || 0);
+  }
+  return Math.round(jumlah);
+}
+
+/** Target kalori harian (sinkron dengan default Pola Makan: 2000). */
+function targetKaloriBeranda() {
+  const profil = muatProfil();
+  if (profil) {
+    const hitungan = hitungTargetKalori(profil);
+    if (hitungan) return hitungan.target;
+  }
+  return TARGET_DEFAULT_KKAL;
+}
+
+/** Render kartu "Ringkasan Hari Ini" (dipanggil saat buka tab Kalkulator). */
+function renderBeranda() {
+  const hariIni = tanggalHariIni();
+
+  const tanggalEl = ambil('berandaTanggal');
+  if (tanggalEl) {
+    tanggalEl.textContent = new Intl.DateTimeFormat('id-ID', {
+      weekday: 'short', day: 'numeric', month: 'short',
+    }).format(new Date());
+  }
+
+  const kkalEl = ambil('berandaKkal');
+  const kkalKet = ambil('berandaKkalKet');
+  const target = targetKaloriBeranda();
+  if (kkalEl) kkalEl.textContent = `${formatRibuan(kkalLogHari(hariIni))} kkal`;
+  if (kkalKet) {
+    kkalKet.textContent = `dari target ${formatRibuan(target)} kkal`;
+  }
+
+  const airEl = ambil('berandaAir');
+  const airKet = ambil('berandaAirKet');
+  if (!state.statusAir) perbaruiAir();
+  if (airEl) {
+    airEl.textContent = `${state.statusAir.terisi}/${state.statusAir.targetGelas} gelas`;
+  }
+  if (airKet) {
+    airKet.textContent = state.statusAir.selesai
+      ? 'target tercapai 🧊'
+      : `target ${state.statusAir.targetLiter} L`;
+  }
+
+  const menitJumlah = muatLogOlahraga(hariIni)
+    .reduce((jumlah, entri) => jumlah + (Number(entri.minutes) || 0), 0);
+  const menitEl = ambil('berandaMenit');
+  const menitKet = ambil('berandaMenitKet');
+  if (menitEl) menitEl.textContent = `${formatRibuan(menitJumlah)} mnt`;
+  if (menitKet) {
+    menitKet.textContent = menitJumlah >= 30
+      ? 'gerak hari ini mantap!'
+      : menitJumlah > 0
+        ? 'tambah sedikit lagi, ya'
+        : 'belum tercatat';
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Pencapaian & titik lonceng (tugas 4.3)
+   -------------------------------------------------------------------------- */
+
+/** Hitung pencapaian dan hidupkan/matiin titik lonceng bila ada yang baru. */
+function perbaruiTitikPencapaian() {
+  state.pencapaian = hitungPencapaian();
+  const titik = ambil('headerTitik');
+  if (titik) titik.hidden = state.pencapaian.baru.length === 0;
+}
+
+/** Ketika lonceng/panel dibuka: tandai badge dilihat, matikan titik. */
+function saatLoncengDibuka() {
+  const pencapaian = state.pencapaian || hitungPencapaian();
+  if (pencapaian.baru.length > 0) {
+    tandaiBadgeDilihat(pencapaian.unlocked);
+    state.pencapaian.baru = [];
+  }
+  const titik = ambil('headerTitik');
+  if (titik) titik.hidden = true;
+}
+
+/* --------------------------------------------------------------------------
+   Onboarding 3 langkah (tugas 4.5)
+   -------------------------------------------------------------------------- */
+
+/** Naikkan ke langkah n; "Lanjut" berubah jadi tuntas di langkah 3. */
+function renderOnboarding(langkah) {
+  let langkahKini;
+  if (typeof langkah === 'number') langkahKini = langkah;
+  else langkahKini = state.onboardLangkah;
+
+  state.onboardLangkah = langkahKini;
+
+  for (let i = 1; i <= 3; i++) {
+    const bagian = ambil(`onboardLangkah${i}`);
+    if (bagian) bagian.hidden = i !== langkahKini;
+  }
+
+  const label = ambil('onboardLangkah');
+  if (label) label.textContent = `${langkahKini} dari 3`;
+  const judul = ambil('onboardJudul');
+  if (judul) {
+    judul.textContent = langkahKini === 1
+      ? 'Selamat Datang'
+      : langkahKini === 2
+        ? 'Lengkapi Profilmu'
+        : 'Catat & Bergerak';
+  }
+
+  const btnLanjut = ambil('btnOnboardLanjut');
+  if (btnLanjut) btnLanjut.hidden = langkahKini === 3;
+  const btnSelesai = ambil('btnOnboardSelesai');
+  if (btnSelesai) btnSelesai.hidden = langkahKini !== 3;
+}
+
+function tampilkanOnboarding() {
+  state.onboardLangkah = 1;
+  renderOnboarding(1);
+  const overlay = ambil('onboardOverlay');
+  if (overlay) overlay.hidden = false;
+}
+
+function tutupOnboarding() {
+  selesaiOnboarding();
+  const overlay = ambil('onboardOverlay');
+  if (overlay) overlay.hidden = true;
+}
+
+function pasangOnboarding() {
+  if (muatOnboardingDilihat()) return;
+
+  ambil('btnOnboardLanjut')?.addEventListener('click', () =>
+    renderOnboarding(Math.min(3, state.onboardLangkah + 1)));
+  ambil('btnOnboardSelesai')?.addEventListener('click', () => {
+    tutupOnboarding();
+    toast('Selamat mencoba! Lanjutkan di tab Kalkulator ya.');
+  });
+  ambil('btnOnboardLewati')?.addEventListener('click', tutupOnboarding);
+  // "Isi profil sekarang" memakai data-tab="akun" (pasangNavigasi) dan
+  // onboarding ikut dituntaskan supaya tak muncul lagi.
+  ambil('btnOnboardIsiProfil')?.addEventListener('click', tutupOnboarding);
+
+  tampilkanOnboarding();
 }
 
 /* --------------------------------------------------------------------------
@@ -403,8 +596,10 @@ function muatNilaiAwal() {
 }
 
 function mulai() {
-  // Tab terakhir yang dibuka (default: kalkulator), bila tidak valid pakai awal.
-  const tabTersimpan = muatTabAktif('kalkulator');
+  // Tab dari URL (manifest shortcuts, tugas 4.7) — contoh ./?tab=olahraga.
+  const tabUrl = new URLSearchParams(window.location.search).get('tab');
+  const tabTersimpan = muatTabAktif(
+    TAB_VALID.includes(tabUrl) ? tabUrl : 'kalkulator');
   state.tabAktif = TAB_VALID.includes(tabTersimpan) ? tabTersimpan : 'kalkulator';
 
   muatNilaiAwal();
@@ -430,6 +625,9 @@ function mulai() {
   state.centangAktivitas = muatAktivitasHariIni().centang || {};
   renderCentangAktivitas(state.centangAktivitas);
 
+  // Ringkasan hari ini di beranda (tugas 4.2).
+  renderBeranda();
+
   // Halaman Akun (Fase 1): siapkan sekali di awal agar tab langsung hidup.
   renderProfilePage(ambil('page-akun'), {
     onProfilTersimpan: saatProfilTersimpan,
@@ -440,6 +638,22 @@ function mulai() {
 
   // Halaman Olahraga (Fase 3): siapkan sekali di awal.
   renderWorkoutPage(ambil('page-olahraga'));
+
+  // Pencapaian (4.3): hitung badge & titik lonceng; disandarkan ke panel.
+  perbaruiTitikPencapaian();
+  if (state.tabAktif === 'akun') {
+    // Langsung dibuka di Akun (mis. ?tab=akun): badge dianggap dilihat.
+    tandaiBadgeDilihat(state.pencapaian.unlocked);
+    state.pencapaian.baru = [];
+    const titik = ambil('headerTitik');
+    if (titik) titik.hidden = true;
+  }
+
+  // Pengingat (4.1): panel lonceng + notifikasi; tidak minta izin otomatis.
+  mulaiPengingat({ saatLoncengDibuka });
+
+  // Onboarding 3 langkah (4.5) untuk pengguna baru.
+  pasangOnboarding();
 
   daftarkanServiceWorker();
   console.info('[NutriKala] Kalkulator BMI siap.');

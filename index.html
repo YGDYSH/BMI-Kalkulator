@@ -76,8 +76,8 @@
             ></path>
             <path d="M10.3 19.2a2 2 0 0 0 3.4 0"></path>
           </svg>
-          <!-- Titik oranye disembunyikan sampai fitur pengingat hadir (Fase 4) -->
-          <span class="header__titik" aria-hidden="true" hidden></span>
+          <!-- Titik oranye menyala bila ada pencapaian baru (tugas 4.3) -->
+          <span class="header__titik" id="headerTitik" aria-hidden="true" hidden></span>
         </button>
       </header>
 
@@ -96,6 +96,45 @@
           <p class="banner__teks">
             Satu langkah kecil hari ini menjaga tubuh tetap ringan, segar, dan
             penuh energi.
+          </p>
+        </section>
+
+        <!-- ============ 2b. RINGKASAN HARI INI (4.2) ============ -->
+        <section class="kartu" aria-labelledby="berandaJudul">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="berandaJudul">Ringkasan Hari ini</h2>
+            <span class="lencana" id="berandaTanggal"></span>
+          </div>
+
+          <div class="beranda__grid">
+            <article class="beranda__kotak">
+              <span class="beranda__label">🍽️ Kalori</span>
+              <span class="beranda__nilai" id="berandaKkal">—</span>
+              <span class="beranda__ket" id="berandaKkalKet"></span>
+            </article>
+            <article class="beranda__kotak">
+              <span class="beranda__label">💧 Air</span>
+              <span class="beranda__nilai" id="berandaAir">—</span>
+              <span class="beranda__ket" id="berandaAirKet"></span>
+            </article>
+            <article class="beranda__kotak">
+              <span class="beranda__label">🏋️ Olahraga</span>
+              <span class="beranda__nilai" id="berandaMenit">—</span>
+              <span class="beranda__ket" id="berandaMenitKet"></span>
+            </article>
+          </div>
+
+          <div class="beranda__tautan">
+            <button class="meal__tautan" type="button" data-tab="pola-makan">
+              Catat makanan di Pola Makan →
+            </button>
+            <button class="meal__tautan" type="button" data-tab="olahraga">
+              Catat latihan di Olahraga →
+            </button>
+          </div>
+
+          <p class="catatan">
+            Dikumpulkan dari catatan Pola Makan, hidrasi, dan Olahraga hari ini.
           </p>
         </section>
 
@@ -1192,6 +1231,44 @@
           <div class="profile__grafik" id="grafikBerat"></div>
         </section>
 
+        <!-- Grafik mingguan (tugas 4.4) -->
+        <section class="kartu" aria-labelledby="akunGrafikJudul">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="akunGrafikJudul">Minggu Ini dalam Angka</h2>
+          </div>
+
+          <p class="profile__sapaan">
+            Kalori masuk vs targetmu, dan menit olahraga harian (Senin–Minggu).
+          </p>
+
+          <h3 class="subjudul">Kalori masuk (kkal)</h3>
+          <div class="profile__grafik" id="akunGrafikKalori"></div>
+
+          <h3 class="subjudul">Menit olahraga per hari</h3>
+          <div class="profile__grafik" id="akunGrafikMenit"></div>
+
+          <p class="catatan">
+            Data diambil dari catatan Pola Makan dan Olahraga minggu ini.
+          </p>
+        </section>
+
+        <!-- Pencapaian (tugas 4.3) -->
+        <section class="kartu" aria-labelledby="akunBadgeJudul">
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="akunBadgeJudul">Pencapaian</h2>
+          </div>
+
+          <p class="profile__sapaan">
+            Lencana kecil yang terbuka sendiri dari kebiasaanmu 🏅
+          </p>
+
+          <ul class="profile__badgeDaftar" id="akunBadgeDaftar"></ul>
+          <p class="catatan">
+            Badge baru menyalakan titik pada lonceng di atas — begitu kamu
+            membukanya, lencana berhenti "mengetuk".
+          </p>
+        </section>
+
         <!-- Pengaturan -->
         <section class="kartu" aria-labelledby="profilPengaturanJudul">
           <div class="kartu__kepala">
@@ -1365,6 +1442,135 @@
           <span class="nav__label">Akun</span>
         </button>
       </nav>
+
+      <!-- ============ PANEL PENGINGAT (tugas 4.1) ============ -->
+      <div class="meal__dialog" id="panelPengingat" hidden>
+        <div
+          class="meal__dialogKotak"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="pengingatJudul"
+        >
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="pengingatJudul">Pengingat Harian</h2>
+            <button
+              class="meal__dialogTutup"
+              id="btnTutupPengingat"
+              type="button"
+              aria-label="Tutup panel pengingat"
+            >
+              ×
+            </button>
+          </div>
+
+          <p class="meal__ket">
+            Pengingat muncul sebagai notifikasi selama aplikasi terbuka di
+            perangkatmu. Izin notifikasi hanya diminta ketika kamu menyalakan
+            pengingatnya — tidak saat aplikasi dibuka.
+          </p>
+
+          <div class="profile__pengaturanBaris">
+            <span class="profile__label">Pengingat</span>
+            <div class="profile__rentang" role="group" aria-label="Jenis pengingat">
+              <button
+                class="profile__chip"
+                id="tglPengAir"
+                type="button"
+                aria-pressed="false"
+              >
+                💧 Minum air
+              </button>
+              <button
+                class="profile__chip"
+                id="tglPengMakan"
+                type="button"
+                aria-pressed="false"
+              >
+                🍚 Makan
+              </button>
+            </div>
+          </div>
+
+          <p class="catatan" id="pengingatStatus"></p>
+        </div>
+      </div>
+
+      <!-- ============ ONBOARDING 3 LANGKAH (tugas 4.5) ============ -->
+      <div class="meal__dialog" id="onboardOverlay" hidden>
+        <div
+          class="meal__dialogKotak"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="onboardJudul"
+        >
+          <div class="kartu__kepala">
+            <h2 class="kartu__judul" id="onboardJudul">Selamat Datang</h2>
+            <button
+              class="meal__dialogTutup"
+              id="btnOnboardLewati"
+              type="button"
+              aria-label="Lewati perkenalan"
+            >
+              ×
+            </button>
+          </div>
+
+          <p class="onboard__langkah" id="onboardLangkah">1 dari 3</p>
+
+          <!-- Langkah 1 -->
+          <div class="onboard__langkah" id="onboardLangkah1">
+            <p class="onboard__ikon" aria-hidden="true">🌿</p>
+            <p class="onboard__teks">
+              NutriKala menemanimu menjaga asupan, hidrasi, dan gerakan harian.
+              Semua catatan tersimpan di perangkatmu — tidak ke mana-mana.
+            </p>
+          </div>
+
+          <!-- Langkah 2 -->
+          <div class="onboard__langkah" id="onboardLangkah2" hidden>
+            <p class="onboard__ikon" aria-hidden="true">🪪</p>
+            <p class="onboard__teks">
+              Lengkapi profilmu sekali saja: target kalori, grafik berat, dan
+              rekomendasi menu akan dibuat otomatis untukmu.
+            </p>
+            <button
+              class="tombol tombol--utama"
+              id="btnOnboardIsiProfil"
+              type="button"
+              data-tab="akun"
+            >
+              Isi profil sekarang
+            </button>
+          </div>
+
+          <!-- Langkah 3 -->
+          <div class="onboard__langkah" id="onboardLangkah3" hidden>
+            <p class="onboard__ikon" aria-hidden="true">🍚💪</p>
+            <p class="onboard__teks">
+              Catat makanan di tab Pola Makan, yang latihan di tab Olahraga.
+              Ringkasan hari ini menunggumu di tab Kalkulator.
+            </p>
+          </div>
+
+          <div class="onboard__aksi">
+            <button
+              class="tombol tombol--utama"
+              id="btnOnboardLanjut"
+              type="button"
+            >
+              Lanjut
+            </button>
+            <button
+              class="tombol tombol--garis"
+              id="btnOnboardSelesai"
+              type="button"
+              hidden
+            >
+              Mulai Sekarang
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Toast sederhana untuk notifikasi -->
       <div

@@ -5,7 +5,14 @@
    ========================================================================== */
 
 import { hitungBMI, kategoriBMI } from './bmi.js';
-import { ringkasanNutrisi } from './nutrition.js';
+import {
+  hitungStreakCatat,
+  hitungTargetKalori,
+  maksMingguan,
+  nomorSenin,
+  ringkasanNutrisi,
+} from './nutrition.js';
+import { dariNomorHari, nomorHari, FOODS } from './data.js';
 import { renderLineChart } from './charts.js';
 import { formatDesimal, formatRibuan, toast } from './ui.js';
 import {
@@ -13,9 +20,14 @@ import {
   hapusSemuaData,
   hapusProfil,
   kumpulkanSemuaData,
+  muatBadgeDilihat,
+  muatLogAir,
   muatLogBerat,
+  muatMakananKustom,
   muatPengaturan,
   muatProfil,
+  muatSemuaLogMakan,
+  muatSemuaLogOlahraga,
   simpanPengaturan,
   simpanProfil,
   tanggalHariIni,
@@ -23,7 +35,7 @@ import {
 } from './storage.js';
 
 /** Versi aplikasi (ditampilkan di kartu Tentang). */
-export const VERSI_APLIKASI = '1.0.0';
+export const VERSI_APLIKASI = '1.1.0';
 
 const FAKTOR_LB = 2.20462;
 
@@ -328,6 +340,201 @@ function saatCatatBerat() {
 }
 
 /* --------------------------------------------------------------------------
+   Grafik mingguan (tugas 4.4): kalori masuk vs target + menit olahraga/hari
+   -------------------------------------------------------------------------- */
+
+/** Senin–Minggu minggu berisi hari ini → array 7 tanggal. */
+function hariMingguIni() {
+  const hariIni = tanggalHariIni();
+  const mulai = nomorHari(hariIni);
+  if (mulai === null) return [];
+  const senin = nomorSenin(hariIni);
+  const hasil = [];
+  for (let i = 0; i < 7; i++) hasil.push(dariNomorHari(senin + i));
+  return hasil;
+}
+
+/** Kkal & menit per hari minggu ini (siap grafik). */
+function dataGrafikMingguan() {
+  const hari = hariMingguIni();
+  const semuaMakan = muatSemuaLogMakan();
+  const semuaOlahraga = muatSemuaLogOlahraga();
+  const katalog = [...FOODS, ...muatMakananKustom()];
+
+  const kkal = [];
+  const menit = [];
+  for (const tanggal of hari) {
+    let kkalHari = 0;
+    for (const entri of (Array.isArray(semuaMakan[tanggal]) ? semuaMakan[tanggal] : [])) {
+      const makanan = katalog.find((m) => m.id === entri.foodId);
+      if (makanan) kkalHari += makanan.kcal * (Number(entri.servings) || 0);
+    }
+    kkal.push(Math.round(kkalHari));
+    let menitHari = 0;
+    for (const entri of (Array.isArray(semuaOlahraga[tanggal]) ? semuaOlahraga[tanggal] : [])) {
+      menitHari += Number(entri.minutes) || 0;
+    }
+    menit.push(menitHari);
+  }
+  return { hari, kkal, menit };
+}
+
+/** Grafik minggu = grafik garis bila ada data; pesan ramah bila kosong. */
+function renderGrafikMingguan() {
+  const { hari, kkal, menit } = dataGrafikMingguan();
+  const profil = muatProfil();
+  const targetKkal = profil
+    ? (hitungTargetKalori(profil)?.target ?? 2000)
+    : 2000;
+
+  const wadahKkal = ambil('akunGrafikKalori');
+  if (wadahKkal) {
+    const totalKkal = kkal.reduce((a, b) => a + b, 0);
+    if (totalKkal === 0) {
+      wadahKkal.replaceChildren();
+      wadahKkal.appendChild(pesanGrafikKosong(
+        'Belum ada kalori masuk minggu ini. Catat makananmu di Pola Makan, ya.'));
+    } else {
+      renderLineChart(wadahKkal, hari.map((t, i) => ({ x: t, value: kkal[i] })), {
+        targetValue: targetKkal,
+        labelTarget: `Target ${formatRibuan(targetKkal)}`,
+        warnaGaris: 'var(--c-utama)',
+        warnaTarget: 'var(--c-ideal)',
+        ariaLabel: 'Grafik kalori masuk minggu ini dibanding target',
+      });
+    }
+  }
+
+  const wadahMenit = ambil('akunGrafikMenit');
+  if (wadahMenit) {
+    const totalMenit = menit.reduce((a, b) => a + b, 0);
+    if (totalMenit === 0) {
+      wadahMenit.replaceChildren();
+      wadahMenit.appendChild(pesanGrafikKosong(
+        'Belum ada latihan minggu ini. 10 menit jalan cepat pun cukup untuk mulai.'));
+    } else {
+      renderLineChart(wadahMenit, hari.map((t, i) => ({ x: t, value: menit[i] })), {
+        targetValue: TARGET_MENIT_HARIAN,
+        labelTarget: `Acuan ${TARGET_MENIT_HARIAN} mnt`,
+        warnaGaris: 'var(--c-ideal)',
+        warnaTarget: 'var(--c-madu)',
+        ariaLabel: 'Grafik menit olahraga per hari minggu ini',
+      });
+    }
+  }
+}
+
+/** Pesan sederhana ketika grafik belum punya data. */
+function pesanGrafikKosong(teks) {
+  const pesan = document.createElement('p');
+  pesan.className = 'profile__grafikKosong';
+  pesan.textContent = teks;
+  return pesan;
+}
+
+/* --------------------------------------------------------------------------
+   Pencapaian (tugas 4.3): lencana kecil dari kebiasaan mencatat
+   -------------------------------------------------------------------------- */
+
+/** Acuan ringan 20 menit/hari untuk grafik menit. */
+const TARGET_MENIT_HARIAN = 20;
+
+/** Daftar badge + syaratnya (id jangan berubah — dipakai di storage). */
+const DAFTAR_BADGE = [
+  { id: 'catat-7', nama: 'Sefrekan Raajin', ket: 'Mencatat (makanan/olahraga/berat) 7 hari beruntun' },
+  { id: 'air-5', nama: 'Teman Segar', ket: 'Target air minum tercapai 5 hari' },
+  { id: 'makan-25', nama: 'Saudagar Catatan', ket: 'Mencatat 25 entri makanan' },
+  { id: 'menit-150', nama: 'Sehat Sepanjang Minggu', ket: '150 menit latihan dalam satu minggu (WHO)' },
+];
+
+/**
+ * Hitung pencapaian dari seluruh data tersimpan.
+ * Dikembalikan { BARIS, keadaan, unlocked, baru } — dipakai app.js untuk titik.
+ */
+export function hitungPencapaian() {
+  const hariIni = tanggalHariIni();
+  const semuaMakan = muatSemuaLogMakan();
+  const semuaOlahraga = muatSemuaLogOlahraga();
+
+  // Tanggal yang "dicatat" = punya entri makanan / olahraga / berat.
+  const tanggalDicatat = new Set();
+  let jumlahEntriMakan = 0;
+  for (const [tanggal, entri] of Object.entries(semuaMakan)) {
+    if (Array.isArray(entri) && entri.length > 0) {
+      tanggalDicatat.add(tanggal);
+      jumlahEntriMakan += entri.length;
+    }
+  }
+  const petaMenit = {};
+  for (const [tanggal, entri] of Object.entries(semuaOlahraga)) {
+    if (!Array.isArray(entri)) continue;
+    if (entri.length > 0) tanggalDicatat.add(tanggal);
+    let menit = 0;
+    for (const item of entri) menit += Number(item.minutes) || 0;
+    if (menit > 0) petaMenit[tanggal] = menit;
+  }
+  for (const entri of muatLogBerat()) tanggalDicatat.add(entri.date);
+
+  const hariAirTercapai = muatLogAir()
+    .filter((e) => e.targetGelas > 0 && e.gelas >= e.targetGelas).length;
+
+  const keadaan = {
+    'catat-7': hitungStreakCatat([...tanggalDicatat], hariIni) >= 7,
+    'air-5': hariAirTercapai >= 5,
+    'makan-25': jumlahEntriMakan >= 25,
+    'menit-150': maksMingguan(petaMenit, hariIni) >= 150,
+  };
+
+  const dilihat = new Set(muatBadgeDilihat());
+  const unlocked = DAFTAR_BADGE.filter((b) => keadaan[b.id]).map((b) => b.id);
+  return {
+    BARIS: DAFTAR_BADGE,
+    keadaan,
+    unlocked,
+    baru: unlocked.filter((id) => !dilihat.has(id)),
+  };
+}
+
+function renderPencapaian() {
+  const wadah = ambil('akunBadgeDaftar');
+  if (!wadah) return;
+
+  const { BARIS, keadaan, unlocked, baru } = hitungPencapaian();
+  wadah.replaceChildren();
+
+  for (const badge of BARIS) {
+    const terbuka = keadaan[badge.id];
+    const item = elemenList('li', 'profile__badgeItem' + (terbuka ? ' profile__badgeItem--terbuka' : ''));
+    item.setAttribute('role', 'listitem');
+
+    const ikon = elemenList('span', 'profile__badgeIkon', terbuka ? '🏆' : '🔒');
+    const teks = elemenList('span', 'profile__badgeTeks');
+    teks.appendChild(elemenList('span', 'profile__badgeNama', badge.nama));
+    teks.appendChild(elemenList('span', 'profile__badgeKet', badge.ket));
+    item.appendChild(ikon);
+    item.appendChild(teks);
+
+    const keadaanTeks = terbuka
+      ? (baru.includes(badge.id) ? 'Baru!' : 'Terbuka')
+      : 'Terkunci';
+    item.appendChild(elemenList('span',
+      'profile__badgeKeadaan' + (terbuka ? ' profile__badgeKeadaan--terbuka' : ''),
+      keadaanTeks));
+
+    wadah.appendChild(item);
+  }
+  void unlocked;
+}
+
+/** createElement + className + textContent dalam satu langkah kecil. */
+function elemenList(tag, kelas, teks) {
+  const node = document.createElement(tag);
+  if (kelas) node.className = kelas;
+  if (teks !== undefined) node.textContent = teks;
+  return node;
+}
+
+/* --------------------------------------------------------------------------
    Pengaturan: tema & satuan
    -------------------------------------------------------------------------- */
 
@@ -481,6 +688,10 @@ export function renderProfilePage(container, opsi = {}) {
   isiFormDariProfil();
   renderRingkasan();
   renderKartuBerat();
+
+  // Fase 4: grafik minggu Keenam ini (4.4) + lencana pencapaian (4.3).
+  renderGrafikMingguan();
+  renderPencapaian();
 
   ambil('btnSimpanProfil')
     ?.addEventListener('click', () => saatSimpanProfil(onProfilTersimpan));

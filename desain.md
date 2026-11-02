@@ -247,13 +247,13 @@ Tugas 2.1–2.10 adalah inti. Tugas 2.11–2.13 hanya dikerjakan setelah inti st
 
 ### FASE 4 — Keterlibatan Harian dan Penyempurnaan
 
-- [ ] **4.1** **Pengingat** minum air dan makan lewat Notification API. Minta izin hanya setelah pengguna menyalakan pengingat, bukan saat aplikasi pertama dibuka. Tangani kasus izin ditolak dan browser tanpa dukungan. Setelah ini jadi, titik pada ikon lonceng boleh dihidupkan lagi (berdasarkan pengingat/pencapaian yang belum dibaca).
-- [ ] **4.2** **Beranda yang terhubung:** ringkasan hari ini di tab Kalkulator atau kartu ringkas (kalori, air, menit olahraga).
-- [ ] **4.3** **Pencapaian/badge** sederhana (contoh: 7 hari mencatat berturut-turut, target air tercapai 5 hari).
-- [ ] **4.4** **Grafik mingguan** kalori masuk vs target, dan menit olahraga per hari (memakai `charts.js`).
-- [ ] **4.5** **Onboarding singkat** 3 langkah untuk pengguna baru yang mengarah ke pengisian profil.
-- [ ] **4.6** Audit akhir: Lighthouse (PWA, Performance, Accessibility ≥ 90), uji offline, uji layar kecil (320px), uji tema gelap.
-- [ ] **4.7** Perbarui `manifest.json` (nama, deskripsi, ikon, `shortcuts` ke Pola Makan dan Olahraga) dan naikkan versi cache `sw.js`.
+- [x] **4.1** **Pengingat** minum air dan makan lewat Notification API. Minta izin hanya setelah pengguna menyalakan pengingat, bukan saat aplikasi pertama dibuka. Tangani kasus izin ditolak dan browser tanpa dukungan. Setelah ini jadi, titik pada ikon lonceng boleh dihidupkan lagi (berdasarkan pengingat/pencapaian yang belum dibaca).
+- [x] **4.2** **Beranda yang terhubung:** ringkasan hari ini di tab Kalkulator atau kartu ringkas (kalori, air, menit olahraga).
+- [x] **4.3** **Pencapaian/badge** sederhana (contoh: 7 hari mencatat berturut-turut, target air tercapai 5 hari).
+- [x] **4.4** **Grafik mingguan** kalori masuk vs target, dan menit olahraga per hari (memakai `charts.js`).
+- [x] **4.5** **Onboarding singkat** 3 langkah untuk pengguna baru yang mengarah ke pengisian profil.
+- [x] **4.6** Audit akhir: Lighthouse (PWA, Performance, Accessibility ≥ 90), uji offline, uji layar kecil (320px), uji tema gelap.
+- [x] **4.7** Perbarui `manifest.json` (nama, deskripsi, ikon, `shortcuts` ke Pola Makan dan Olahraga) dan naikkan versi cache `sw.js`.
 
 ---
 
@@ -356,3 +356,13 @@ Sebelum menandai fase selesai:
   - Kunci baru `nutrikala:mealPlan` (angka seed) + `nutrikala:shoppingCheck` otomatis ikut terekspor/dihapus lewat PREFIKS di `storage.js`.
   - `sw.js`: tidak ada berkas baru, cache naik ke `nutrikala-shell-v6` karena index/style/js berubah.
   - Uji node: `buatRencanaMingguan` (7 hari × 3 seed, lampung porsi kelipatan 0,5 dalam 0,5–2, snack Selasa → camilan, deterministik `JSON.stringify` sama), `daftarBelanjaDariRencana` (37 item + `id`), clamp target 0 → 1200; storage: seed stabil/simpan/validasi, centang tambah-hapus-kosong — semua `OK`; `node --check` 11 modul `OK`. Verifikasi manual di `http://localhost/Bmi-Calc/` (rencana, belanja, resep, info bakar, BMI/hidrasi tetap jalan, offline) belum dilakukan.
+
+- **2 Nov 2026 — Fase 4 (4.1–4.7): keterlibatan harian & penyempurnaan.**
+  - **4.1:** modul baru `assets/js/reminders.js` — export `mulaiPengingat({ saatLoncengDibuka })` dipasang dari `app.js`. Panel pengingat (`#panelPengingat`) dibuka dari ikon lonceng `#btnNotifikasi`, memakai ulang class `.meal__dialog*` + `.profile__chip`. Dua toggle: air (`JAM_AIR` 8/10/12/15/17/19) & makan (`JAM_MAKAN` 7/13/19). Penjadwalan `setTimeout` ke terdekat lalu diulang setiap terpicu & saat `visibilitychange` (aplikasi kembali terlihat). Izin hanya diminta saat menyalakan (default → requestPermission; denied → toast & toggle tidak aktif); kasus tanpa dukungan ditangani dengan pesan. Kunci baru `nutrikala:reminders`. Karena PWA tanpa backend, notifikasi hanya berjalan selama aplikasi terbuka — dicatat sebagai batas desain.
+  - **4.2:** kartu "Ringkasan Hari Ini" (`#beranda*`) di tab Kalkulator: kalori hari ini (log makan × `FOODS`+kustom) vs target (`hitungTargetKalori` profil, fallback 2000), air (`state.statusAir`; `catatSnapshotAir` upsert per hari ke `nutrikala:waterLog`, maks 60 entri), menit olahraga. Tombol cepat ke Pola Makan & Olahraga. Disegarkan saat buka Kalkulator, tambah/undo air, dan pasca-tampilkan hasil.
+  - **4.3:** pencapaian di halaman Akun (`#akunBadgeDaftar`): `catat-7` (streak 7 hari union tanggal log makan/olahraga/berat), `air-5` (5 hari gelas ≥ target), `makan-25` (25 entri makanan), `menit-150` (150 menit dalam satu minggu Senin–Minggu per WHO). Stempil keadaan badge: "Baru!"/Terbuka/Terkunci. Helper murni di `data.js` — `nomorHari`/`dariNomorHari` (murni UTC agar bebas zona waktu), `nomorSenin`, `hitungStreakCatat`, `maksMingguan` — supaya bisa diuji node (profile.js sendiri menyentuh `document`). `hitungPencapaian()` di `profile.js` digunakan oleh `app.js` untuk titik lonceng `#headerTitik` (menyala bila ada badge baru; padam setelah panel lonceng atau halaman Akun dibuka → `tandaiBadgeDilihat` ke `nutrikala:badgesSeen`).
+  - **4.4:** kartu "Minggu Ini dalam Angka" di halaman Akun: grafik kalori masuk 7 hari (Senin–Minggu) vs target garis putus-putus (`renderLineChart` opsi `targetValue`) dari `muatSemuaLogMakan`, dan grafik menit olahraga per hari (acuan 20 mnt/hari) dari `muatSemuaLogOlahraga`. Setiap grafik menampilkan bagian kosong ("belum ada data …").
+  - **4.5:** onboarding 3 langkah (`#onboardOverlay`, class `.onboard__*`): (1) sambutan & privasi, (2) ajakan isi profil dengan tombol data-tab="akun", (3) ajakan mencatat. "Lewati"/"Mulai" menandai `nutrikala:onboarding` selesai — hanya muncul untuk pengguna baru. Bila pengguna memilih "Isi profil sekarang" langsung navigasi ke tab Akun (tombol dipantau `pasangNavigasi`), overlay ikut ditutup.
+  - **4.6:** audit sebagian otomatis: `node --check` 12 modul + uji node (pengingat simpan/validasi pola "abaikan nilai tak-valid", upsert log air, badge dilihat, onboarding, `nomorHari` bolak-balik & `nomorSenin` UTC, streak 4 kasus, `maksMingguan`; semua `OK`). Verifikasi Lighthouse/offline/layar 320px/tema gelap perlu manual di browser — dicek saat sesi verifikasi akhir.
+  - **4.7:** `manifest.json`: deskripsi diperbarui + `shortcuts` (./?tab=pola-makan|olahraga|akun, `app.js` mendukung `?tab=` dengan guard `TAB_VALID`). `sw.js`: `reminders.js` masuk app shell, cache naik ke `nutrikala-shell-v7`. `VERSI_APLIKASI` di `profile.js` bump '1.0.0' → '1.1.0'.
+  - Keputusan (catatan): panel pengingat & onboarding memakai ulang class `.meal__dialog*` (agar tidak menambah CSS baru pada pola sama). Data grafik mingguan diambil saat `renderProfilePage` saja (muat sekali per kunjungan; tidak observe perubahan agar tetap ringan — muat ulang halaman menampilkan terbaru). Badge "makan-x" menghitung jumlah entri (bukan varietas). Streak union mencatat tanggal apa pun yang punya entri makanan/olahraga/berat.

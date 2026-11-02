@@ -1,7 +1,7 @@
 {
   "name": "NutriKala",
   "short_name": "NutriKala",
-  "description": "Kalkulator BMI hangat dengan rekomendasi menu rumahan, panduan nutrisi harian, aktivitas fisik, dan catatan hidrasi.",
+  "description": "Kalkulator BMI hangat dengan rekomendasi menu rumahan, panduan nutrisi harian, aktivitas fisik, catatan hidrasi, rencana makan mingguan, dan pengingat lembut.",
   "lang": "id",
   "dir": "ltr",
   "start_url": "./",
@@ -11,6 +11,23 @@
   "theme_color": "#ea580c",
   "background_color": "#fffaf3",
   "categories": ["health", "lifestyle", "food"],
+  "shortcuts": [
+    {
+      "name": "Pola Makan",
+      "url": "./?tab=pola-makan",
+      "description": "Rekomendasi menu, rencana mingguan, dan daftar belanja"
+    },
+    {
+      "name": "Olahraga",
+      "url": "./?tab=olahraga",
+      "description": "Panduan aktivitas fisik dan latihan terpandu"
+    },
+    {
+      "name": "Akun",
+      "url": "./?tab=akun",
+      "description": "Kesehatan, pencapaian, dan pengaturan"
+    }
+  ],
   "icons": [
     {
       "src": "./assets/icons/icon-192.png",

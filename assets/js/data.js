@@ -969,3 +969,74 @@ export const TINGKAT_LATIHAN = {
   sedang: 'Sedang',
   mahir: 'Mahir',
 };
+
+/* --------------------------------------------------------------------------
+   Helper pencapaian (Fase 4, tugas 4.3) — fungsi murni, mudah diuji node.
+   -------------------------------------------------------------------------- */
+
+/** YYYY-MM-DD → angka hari sejak epoch (murni UTC, bebas zona waktu). */
+export function nomorHari(tanggal) {
+  const [y, m, d] = String(tanggal).split('-').map(Number);
+  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return null;
+  return Math.floor(Date.UTC(y, m - 1, d) / 86400000);
+}
+
+/**
+ * Streak tanggal beruntun (mundur dari hari ini; bila hari ini kosong,
+ * mulai dari kemarin) — dipakai badge "7 hari mencatat" (tugas 4.3).
+ * @param {string[]} daftarTanggal tanggal yang punya entri
+ * @param {string} hariIni tanggal referensi
+ */
+export function hitungStreakCatat(daftarTanggal, hariIni) {
+  const set = new Set(daftarTanggal.filter((t) => nomorHari(t) !== null));
+  let nomor = nomorHari(hariIni);
+  if (!Number.isFinite(nomor)) return 0;
+  if (!set.has(hariIni)) nomor -= 1; // hari ini belum mencatat: cek sampai kemarin
+
+  let beruntun = 0;
+  while (nomor !== null && set.has(dariNomorHari(nomor))) {
+    beruntun++;
+    nomor -= 1;
+  }
+  return beruntun;
+}
+
+/** Kebalikan nomorHari: angka → 'YYYY-MM-DD' (murni UTC). */
+export function dariNomorHari(nomor) {
+  const iso = new Date(nomor * 86400000).toISOString();
+  return iso.slice(0, 10);
+}
+
+/** Senin (nomor hari) minggu yang memuat `tanggal` — murni epoch. */
+export function nomorSenin(tanggal) {
+  const n = nomorHari(tanggal);
+  if (n === null) return null;
+  const hari = ((n + 4) % 7 + 7) % 7; // 0=Minggu, 1=Senin, … 6=Sabtu
+  return n - ((hari + 6) % 7);        // mundur ke Senin
+}
+
+/**
+ * Maksimum menit (atau nilai lain) terakumulasi dalam satu minggu Senin–Minggu
+ * — dipakai badge "150 menit dalam satu minggu" (tugas 4.3).
+ * @param {Object} petaTanggal { 'YYYY-MM-DD': angka }
+ * @param {string} hariIni tanggal referensi (batas atas iterasi)
+ */
+export function maksMingguan(petaTanggal, hariIni) {
+  const entri = Object.entries(petaTanggal)
+    .map(([tanggal, nilai]) => ({ tanggal, nomor: nomorHari(tanggal), nilai: Number(nilai) || 0 }))
+    .filter((e) => e.nomor !== null)
+    .sort((a, b) => a.nomor - b.nomor);
+  if (entri.length === 0) return 0;
+
+  const batas = nomorHari(hariIni) || 0;
+  let maks = 0;
+  for (let i = 0; i < entri.length; i++) {
+    const senin = nomorSenin(entri[i].tanggal);
+    if (senin === null || senin > batas) continue;
+    const mingguIni = entri
+      .filter((e) => nomorSenin(e.tanggal) === senin)
+      .reduce((jumlah, e) => jumlah + e.nilai, 0);
+    maks = Math.max(maks, mingguIni);
+  }
+  return maks;
+}
